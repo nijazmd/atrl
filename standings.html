@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Player Standings</title>
+    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, user-scalable=no">
+</head>
+<body>
+    <h2>Player Standings</h2>
+    
+    <table id="standingsTable">
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>Player</th>
+                <th>Team</th>
+                <th>Trade Win %</th>
+                <th>PnL</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Data will be filled dynamically by JavaScript -->
+        </tbody>
+    </table>
+
+    <h2>Team Standings</h2>
+<table id="teamStandingsTable">
+  <thead>
+    <tr>
+      <th>Rank</th>
+      <th>Team</th>
+      <th>Total PnL</th>
+      <th>Total Trades</th>
+      <th>Wins</th>
+      <th>Losses</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- Filled dynamically -->
+  </tbody>
+</table>
+
+<div class="navbar">
+  <a href="index.html">🏠<span>Home</span></a>
+  <a href="standings.html">📊<span>Standings</span></a>
+  <a href="add.html" class="plus-button">➕</a>
+</div>
+
+
+<!-- Include Google Material Icons -->
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+
+
+    <script src="standings.js"></script>
+</body>
+</html>

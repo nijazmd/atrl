@@ -1,0 +1,157 @@
+/* Global Layout */
+body {
+    margin: 0;
+    padding: 20px;
+    font-family: "Segoe UI", Roboto, sans-serif;
+    background-color: #0b1c2c;
+    color: #e0e8f0;
+    min-height: 100vh;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+  
+  main {
+    flex: 1;
+  }
+  
+  /* Headings */
+  h1, h2 {
+    margin-bottom: 16px;
+    font-weight: 600;
+    color: #f0f4f8;
+  }
+  
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #13293d;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 20px;
+  }
+  
+  thead {
+    background-color: #1f3b57;
+  }
+  
+  th {
+    padding: 10px 16px;
+    text-align: left;
+    color: #a8c6e1;
+    font-weight: normal; /* Not bold */
+  }
+  
+  td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #2a4561;
+  }
+  
+  tr:last-child td {
+    border-bottom: none;
+  }
+  
+  /* Form Styling */
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    background-color: #13293d;
+    padding: 20px;
+    border-radius: 12px;
+  }
+  
+  label {
+    font-size: 14px;
+    color: #b0c7dd;
+    margin-bottom: 4px;
+    display: block;
+  }
+  
+  input, select {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 6px;
+    border: 1px solid #2a4561;
+    background-color: #1a2f45;
+    color: #f0f4f8;
+    font-size: 15px;
+    margin-top: 4px;
+  }
+  
+  input:focus, select:focus {
+    outline: none;
+    border-color: #3498db;
+  }
+  
+  /* Button Styling */
+  button {
+    padding: 12px;
+    border: none;
+    border-radius: 6px;
+    background-color: #2b79c2;
+    color: white;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  button:hover {
+    background-color: #1e5c91;
+  }
+  
+  /* Bottom Navigation Bar */
+  .navbar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #102436;
+    border-top: 1px solid #2a4561;
+    display: flex;
+    justify-content: space-around;
+    padding: 8px 0;
+    z-index: 1000;
+  }
+  
+  .navbar a {
+    color: #bcd0e3;
+    text-decoration: none;
+    font-size: 13px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+  
+  .navbar a:hover {
+    color: #ffffff;
+  }
+  
+  .navbar .plus-button {
+    font-size: 22px;
+    color: #2b79c2;
+    background: none;
+    padding: 0;
+    margin-top: -6px;
+  }
+  
+  /* Responsive */
+  @media (max-width: 600px) {
+    h1, h2 {
+      font-size: 20px;
+    }
+  
+    button, input, select {
+      font-size: 14px;
+    }
+  }
+  .version {
+    font-size: 12px;
+    color: #a8c6e1;
+  }

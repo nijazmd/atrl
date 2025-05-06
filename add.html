@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ATrL Trade Entry</title>
+  <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width, user-scalable=no">
+</head>
+<body>
+  <h2>Add New Trade</h2>
+  <form id="tradeForm" method="post">
+    <label>Round Number:
+      <input type="number" name="RoundNumber" value="1" required>
+    </label><br><br>
+
+    <label>Team:
+      <select name="Team" required>
+        <option value="">Select Team</option>
+        <option value="AMC">AMC</option>
+        <option value="BIS">BIS</option>
+        <option value="BOS">BOS</option>
+        <!-- Add all team options -->
+      </select>
+    </label><br><br>
+
+    <label>Player:
+      <select name="Player" id="playerSelect" required>
+        <option value="">Select Player</option>
+      </select>
+    </label><br><br>
+    
+    
+    
+
+    <label>Scrip:
+      <input type="text" name="Scrip" required>
+    </label><br><br>
+
+    <label>Position Type:
+      <select name="PositionType" required>
+        <option value="">Select</option>
+        <option value="Long">Long</option>
+        <option value="Short">Short</option>
+      </select>
+    </label><br><br>
+
+    <label>Stop Loss:
+      <input type="number" name="StopLoss" required step="0.01">
+    </label><br><br>
+
+    <label>Quantity:
+      <input type="number" name="Qty" required>
+    </label><br><br>
+
+    <label>Entry Price:
+      <input type="number" name="EntryPrice" required step="0.01">
+    </label><br><br>
+
+    <button type="submit">Submit Trade</button>
+  </form>
+
+  <p id="submitStatus"></p>
+
+  <div class="navbar">
+    <a href="index.html">🏠<span>Home</span></a>
+    <a href="standings.html">📊<span>Standings</span></a>
+    <a href="add.html" class="plus-button">➕</a>
+  </div>
+  
+  
+  <!-- Include Google Material Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  
+
+  <script src="add.js"></script>
+</body>
+</html>
