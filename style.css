@@ -1,157 +1,187 @@
-/* Global Layout */
-body {
-    margin: 0;
-    padding: 20px;
-    font-family: "Segoe UI", Roboto, sans-serif;
-    background-color: #0b1c2c;
-    color: #e0e8f0;
-    min-height: 100vh;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-  }
+/* Global Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', sans-serif;
+}
 
-  * {
-    box-sizing: border-box;
+/* Body */
+body {
+  background-color: #0b0c2a;
+  color: #f0f0f5;
+  padding: 1rem;
+  padding-bottom: 90px;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* Headings */
+h2, h3 {
+  color: #ffffff;
+  margin: 1rem 1rem 0.5rem;
+  font-weight: 600;
+}
+
+/* Cards */
+.card, .trade-card, .player-card {
+  background: #1c1f4a;
+  border-radius: 14px;
+  padding: 1rem;
+  margin: 1rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  animation: fadeIn 0.5s ease;
+  transition: transform 0.2s ease;
+}
+.card:hover, .trade-card:hover, .player-card:hover {
+  transform: scale(1.01);
+}
+.card {
+  flex: 1 1 45%;
+}
+
+/* Form Elements */
+input, select, button {
+  padding: 0.6rem;
+  margin-top: 0.4rem;
+  margin-bottom: 1rem;
+  width: 100%;
+  border: none;
+  border-radius: 8px;
+  background: #2d2f66;
+  color: #fff;
+}
+input[type="radio"],
+input[type="checkbox"] {
+  width: auto;
+}
+button {
+  background: #3d8aff;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+button:hover {
+  background: #256be6;
+}
+label {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+/* Trade Info */
+.trade-header {
+  display: flex;
+  justify-content: space-between;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+.trade-detail {
+  margin: 0.3rem 0;
+}
+.trade-action {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+/* Table */
+table {
+  width: 100%;
+  margin: 1rem 0;
+  border-collapse: collapse;
+  background: #1c1f4a;
+  border-radius: 12px;
+  overflow: auto;
+  display: block;
+}
+th, td {
+  padding: 0.75rem;
+  text-align: center;
+  white-space: nowrap;
+}
+th {
+  background-color: #2e3264;
+  color: #f0f0f5;
+  font-weight: 600;
+}
+td {
+  background-color: #24285e;
+}
+a {
+  color: #90caf9;
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+/* Player Cards in Team Page */
+.player-card {
+  margin: 0.75rem;
+  padding: 0.75rem;
+  background: #262a5a;
+}
+
+/* Progress bar */
+.player-card div[style*="background: lightgray"] {
+  margin-top: 6px;
+  border-radius: 6px;
+}
+.player-card div[style*="background: green"] {
+  transition: width 0.4s ease;
+}
+
+/* Navbar */
+.navbar {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background: #121438;
+  display: flex;
+  justify-content: space-around;
+  padding: 0.75rem 0;
+  border-top: 1px solid #333;
+  z-index: 1000;
+}
+.navbar a {
+  color: #ccc;
+  text-decoration: none;
+  font-size: 1.4rem;
+  transition: color 0.3s ease;
+}
+.navbar a:hover {
+  color: #ffffff;
+}
+.plus-button {
+  background: #3d8aff;
+  color: white;
+  font-size: 1.5rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 50%;
+}
+
+/* Two-column layout for card stats */
+.card-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-evenly;
+  gap: 1rem;
+  margin: 1rem;
+}
+
+/* Responsive fallback */
+@media (max-width: 600px) {
+  .card {
+    width: 100% !important;
+    margin: 0.75rem 0.5rem;
   }
-  
-  main {
-    flex: 1;
-  }
-  
-  /* Headings */
-  h1, h2 {
-    margin-bottom: 16px;
-    font-weight: 600;
-    color: #f0f4f8;
-  }
-  
-  /* Tables */
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    background-color: #13293d;
-    border-radius: 10px;
-    overflow: hidden;
-    margin-top: 20px;
-  }
-  
-  thead {
-    background-color: #1f3b57;
-  }
-  
-  th {
-    padding: 10px 16px;
-    text-align: left;
-    color: #a8c6e1;
-    font-weight: normal; /* Not bold */
-  }
-  
-  td {
-    padding: 12px 16px;
-    border-bottom: 1px solid #2a4561;
-  }
-  
-  tr:last-child td {
-    border-bottom: none;
-  }
-  
-  /* Form Styling */
-  form {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    background-color: #13293d;
-    padding: 20px;
-    border-radius: 12px;
-  }
-  
-  label {
-    font-size: 14px;
-    color: #b0c7dd;
-    margin-bottom: 4px;
-    display: block;
-  }
-  
-  input, select {
-    width: 100%;
-    padding: 10px 12px;
-    border-radius: 6px;
-    border: 1px solid #2a4561;
-    background-color: #1a2f45;
-    color: #f0f4f8;
-    font-size: 15px;
-    margin-top: 4px;
-  }
-  
-  input:focus, select:focus {
-    outline: none;
-    border-color: #3498db;
-  }
-  
-  /* Button Styling */
-  button {
-    padding: 12px;
-    border: none;
-    border-radius: 6px;
-    background-color: #2b79c2;
-    color: white;
-    font-size: 15px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  
-  button:hover {
-    background-color: #1e5c91;
-  }
-  
-  /* Bottom Navigation Bar */
-  .navbar {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background-color: #102436;
-    border-top: 1px solid #2a4561;
-    display: flex;
-    justify-content: space-around;
-    padding: 8px 0;
-    z-index: 1000;
-  }
-  
-  .navbar a {
-    color: #bcd0e3;
-    text-decoration: none;
-    font-size: 13px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2px;
-  }
-  
-  .navbar a:hover {
-    color: #ffffff;
-  }
-  
-  .navbar .plus-button {
-    font-size: 22px;
-    color: #2b79c2;
-    background: none;
-    padding: 0;
-    margin-top: -6px;
-  }
-  
-  /* Responsive */
-  @media (max-width: 600px) {
-    h1, h2 {
-      font-size: 20px;
-    }
-  
-    button, input, select {
-      font-size: 14px;
-    }
-  }
-  .version {
-    font-size: 12px;
-    color: #a8c6e1;
-  }
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

@@ -1,4 +1,4 @@
-const API_URL = "https://script.google.com/macros/s/AKfycbyTfKUqTt1bN3WFRyQlWWMh7tAX4af0qasvb2bhoNoJ98eImhqP0IPyMojneD7dL0nIjw/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbxe_aqoQxqVaegrls1R9xylSJj6QeR7FJmOU8eL6vz5qmEOkPjI2dRc1g5CHQVTy4mxSg/exec";
 
 fetch(API_URL + "?action=getTrades")
   .then(response => response.json())
@@ -17,13 +17,14 @@ fetch(API_URL + "?action=getTrades")
         margin-bottom: 1rem;
       `;
 
+      const total = (parseFloat(trade.Qty) * parseFloat(trade.EntryPrice)).toFixed(2);
+      const color = trade.PositionType === 'Long' ? 'green' : 'red';
+
       tradeDiv.innerHTML = `
-        <p><strong>Team:</strong> ${trade.Team}</p>
-        <p><strong>Player:</strong> ${trade.Player}</p>
+        <p><strong>${trade.Team} - ${trade.Player}</strong></p>
         <p><strong>Scrip:</strong> ${trade.Scrip}</p>
-        <p><strong>Position Type:</strong> ${trade.PositionType}</p>
-        <p><strong>Qty:</strong> ${trade.Qty}</p>
-        <p><strong>Entry Price:</strong> ${trade.EntryPrice}</p>
+        <p><strong>Type:</strong> <span style="color: ${color};">${trade.PositionType}</span></p>
+        <p><strong>Qty:</strong> ${trade.Qty} × ₹${trade.EntryPrice} = ₹${total}</p>
         <input type="number" placeholder="Exit Price" step="0.01" class="exit-price-input" />
         <button onclick="closeTrade('${trade.TradeID}', this)">Close Trade</button>
       `;
@@ -43,6 +44,8 @@ function closeTrade(tradeId, button) {
     alert("Please enter a valid exit price.");
     return;
   }
+
+  if (!confirm(`Close trade at ₹${exitPrice}?`)) return;
 
   fetch(API_URL, {
     method: "POST",
