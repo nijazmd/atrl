@@ -1,12 +1,10 @@
-/* Global Reset */
+/* RESET + BASE */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
   font-family: 'Segoe UI', sans-serif;
 }
-
-/* Body */
 body {
   background-color: #0b0c2a;
   color: #f0f0f5;
@@ -16,127 +14,49 @@ body {
   overflow-x: hidden;
 }
 
-/* Headings */
+/* HEADINGS */
 h2, h3 {
   color: #ffffff;
-  margin: 1rem 1rem 0.5rem;
+  font-size: 1.1rem;
   font-weight: 600;
+  margin: 1rem 1rem 0.5rem;
 }
 
-/* Cards */
-.card, .trade-card, .player-card {
-  background: #1c1f4a;
-  border-radius: 14px;
-  padding: 1rem;
-  margin: 1rem;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-  animation: fadeIn 0.5s ease;
-  transition: transform 0.2s ease;
-}
-.card:hover, .trade-card:hover, .player-card:hover {
-  transform: scale(1.01);
+/* CARD GRID STATS */
+.card-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin: 1rem 0.5rem;
 }
 .card {
-  flex: 1 1 45%;
-}
-
-/* Form Elements */
-input, select, button {
-  padding: 0.6rem;
-  margin-top: 0.4rem;
-  margin-bottom: 1rem;
-  width: 100%;
-  border: none;
-  border-radius: 8px;
-  background: #2d2f66;
-  color: #fff;
-}
-input[type="radio"],
-input[type="checkbox"] {
-  width: auto;
-}
-button {
-  background: #3d8aff;
-  color: #fff;
-  font-weight: 600;
-  cursor: pointer;
-}
-button:hover {
-  background: #256be6;
-}
-label {
-  display: block;
+  background: #1f1f3a;
+  color: white;
+  padding: 1rem;
+  border-radius: 14px;
   font-size: 0.95rem;
-  font-weight: 500;
-  margin-bottom: 0.25rem;
+  box-shadow: 0 0 8px rgba(0,0,0,0.25);
+  animation: fadeIn 0.5s ease;
 }
-
-/* Trade Info */
-.trade-header {
-  display: flex;
-  justify-content: space-between;
+.card span {
+  font-size: 1.35rem;
   font-weight: bold;
-  margin-bottom: 0.5rem;
-}
-.trade-detail {
-  margin: 0.3rem 0;
-}
-.trade-action {
-  display: flex;
-  gap: 0.5rem;
-  margin-top: 1rem;
+  color: #fff;
 }
 
-/* Table */
-table {
-  width: 100%;
-  margin: 1rem 0;
-  border-collapse: collapse;
-  background: #1c1f4a;
-  border-radius: 12px;
-  overflow: auto;
-  display: block;
-}
-th, td {
-  padding: 0.75rem;
-  text-align: center;
-  white-space: nowrap;
-}
-th {
-  background-color: #2e3264;
-  color: #f0f0f5;
-  font-weight: 600;
-}
-td {
-  background-color: #24285e;
-}
-a {
-  color: #90caf9;
-  text-decoration: none;
-}
-a:hover {
-  text-decoration: underline;
-}
-
-/* Player Cards in Team Page */
+/* PLAYER CARDS */
 .player-card {
   margin: 0.75rem;
   padding: 0.75rem;
   background: #262a5a;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
 }
 
-/* Progress bar */
-.player-card div[style*="background: lightgray"] {
-  margin-top: 6px;
-  border-radius: 6px;
-}
-.player-card div[style*="background: green"] {
-  transition: width 0.4s ease;
-}
-
-/* Navbar */
+/* NAVBAR */
 .navbar {
   position: fixed;
+  left: 0;
   bottom: 0;
   width: 100%;
   background: #121438;
@@ -155,33 +75,242 @@ a:hover {
 .navbar a:hover {
   color: #ffffff;
 }
-.plus-button {
-  background: #3d8aff;
-  color: white;
-  font-size: 1.5rem;
-  padding: 0.4rem 0.8rem;
-  border-radius: 50%;
-}
 
-/* Two-column layout for card stats */
-.card-grid {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-evenly;
-  gap: 1rem;
+/* FORM LAYOUT */
+form {
   margin: 1rem;
 }
-
-/* Responsive fallback */
-@media (max-width: 600px) {
-  .card {
-    width: 100% !important;
-    margin: 0.75rem 0.5rem;
-  }
+form .form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+form .form-group {
+  flex: 1 1 48%;
+}
+label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 0.4rem;
 }
 
-/* Animations */
+/* INPUTS */
+input, select, textarea {
+  padding: 0.6rem;
+  border-radius: 8px;
+  border: none;
+  background: #2d2f66;
+  color: #fff;
+  width: 100%;
+}
+input[type="radio"] {
+  display: none;
+}
+.radio-group {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.radio-button {
+  background: #2d2f66;
+  color: #fff;
+  padding: 0.5rem 0.9rem;
+  border-radius: 8px;
+  cursor: pointer;
+  user-select: none;
+  border: 2px solid transparent;
+  font-size: 0.9rem;
+}
+input[type="radio"]:checked + .radio-button {
+  background: #3d8aff;
+  border-color: #256be6;
+}
+
+/* BUTTONS */
+button {
+  background: #3d8aff;
+  color: white;
+  padding: 0.7rem 1.2rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 1rem;
+}
+button:hover {
+  background: #256be6;
+}
+
+/* TRADE + TABLES */
+.trade-card, .trade-header, .trade-detail {
+  background: #1c1f4a;
+  border-radius: 12px;
+  padding: 1rem;
+  margin: 1rem;
+  color: white;
+}
+.trade-header {
+  display: flex;
+  justify-content: space-between;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+.trade-detail {
+  margin: 0.4rem 0;
+}
+.trade-action {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+/* TABLES */
+table {
+  width: 100%;
+  margin: 1rem 0;
+  border-collapse: collapse;
+  background: #1c1f4a;
+  border-radius: 12px;
+  overflow-x: auto;
+  display: block;
+}
+th, td {
+  padding: 0.75rem;
+  text-align: center;
+  white-space: nowrap;
+}
+th {
+  background-color: #2e3264;
+  color: #f0f0f5;
+  font-weight: 600;
+}
+td {
+  background-color: #24285e;
+}
+
+/* LINKS */
+a {
+  color: #90caf9;
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+/* PROGRESS BAR INSIDE CARDS */
+.player-card div[style*="background: lightgray"] {
+  margin-top: 6px;
+  border-radius: 6px;
+}
+.player-card div[style*="background: green"] {
+  transition: width 0.4s ease;
+}
+
+input[type="radio"] {
+  display: none;
+}
+.radio-wrapper {
+  display: inline-block;
+  margin: 0.3rem 0.5rem 0.3rem 0;
+}
+.radio-button {
+  background: #2d2f66;
+  color: white;
+  padding: 0.5rem 0.9rem;
+  border-radius: 8px;
+  cursor: pointer;
+  user-select: none;
+  display: inline-block;
+  border: 2px solid transparent;
+  font-size: 0.9rem;
+}
+input[type="radio"]:checked + .radio-button {
+  background: #3d8aff;
+  border-color: #256be6;
+}
+.radio-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0 1rem;
+}
+.radio-wrapper {
+  display: inline-block;
+}
+input[type="radio"] {
+  display: none;
+}
+.radio-button {
+  background: #2d2f66;
+  color: #fff;
+  padding: 0.5rem 0.9rem;
+  border-radius: 8px;
+  cursor: pointer;
+  user-select: none;
+  display: inline-block;
+  border: 2px solid transparent;
+  font-size: 0.9rem;
+}
+input[type="radio"]:checked + .radio-button {
+  background: #3d8aff;
+  border-color: #256be6;
+}
+.radio-group {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+}
+
+.radio-wrapper {
+  display: inline-block;
+}
+
+input[type="radio"] {
+  display: none;
+}
+
+.radio-button {
+  background: #2d2f66;
+  color: white;
+  padding: 0.5rem 0.9rem;
+  border-radius: 8px;
+  cursor: pointer;
+  user-select: none;
+  display: inline-block;
+  border: 2px solid transparent;
+  font-size: 0.9rem;
+  transition: background 0.3s, border 0.3s;
+}
+
+input[type="radio"]:checked + .radio-button {
+  background: #3d8aff;
+  border-color: #256be6;
+}
+
+.version {
+  font-size: 12px;
+  color:#3c2b9c;
+  text-align: center;
+}
+
+/* ANIMATION */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* RESPONSIVE */
+@media (max-width: 600px) {
+  .card-grid {
+    grid-template-columns: 1fr;
+  }
+  .card {
+    margin: 0.5rem 0;
+  }
+  .form-row {
+    flex-direction: column;
+  }
 }

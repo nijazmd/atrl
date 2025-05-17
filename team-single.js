@@ -1,11 +1,29 @@
 const API_URL = "https://script.google.com/macros/s/AKfycbxe_aqoQxqVaegrls1R9xylSJj6QeR7FJmOU8eL6vz5qmEOkPjI2dRc1g5CHQVTy4mxSg/exec";
 
+const teams = ["AMC", "BIS", "BOS", "CAR", "FRE", "GRE", "HST", "OTT", "PNX", "ZDG"];
+const teamSelector = document.getElementById("teamSelector");
+
+const currentTeam = new URLSearchParams(window.location.search).get("team");
+
+teams.forEach(code => {
+  const label = document.createElement("label");
+  label.classList.add("radio-wrapper");
+  label.innerHTML = `
+    <input type="radio" name="team" value="${code}" ${code === currentTeam ? "checked" : ""}>
+    <span class="radio-button">${code}</span>
+  `;
+  label.querySelector("input").addEventListener("change", () => {
+    window.location.href = `team-single.html?team=${code}`;
+  });
+  teamSelector.appendChild(label);
+});
 
 const urlParams = new URLSearchParams(window.location.search);
 const teamCode = urlParams.get("team");
 
 if (!teamCode) {
-  alert("No team specified.");
+  // Don't alert — just stop further processing
+  document.getElementById("teamName").textContent = "Select a Team";
 } else {
   document.getElementById("teamName").textContent = teamCode;
 
@@ -15,7 +33,6 @@ if (!teamCode) {
   ]).then(([closedData, queueData]) => {
     const trades = closedData.trades.filter(t => t.Team === teamCode);
 
-    // Team level stats
     let totalTrades = trades.length;
     let wins = 0, losses = 0, pnl = 0;
 
@@ -34,7 +51,6 @@ if (!teamCode) {
     document.getElementById("teamLosses").textContent = losses;
     document.getElementById("teamWinRate").textContent = winRate;
 
-    // Player stats
     const playerStats = {};
     closedData.trades.forEach(t => {
       if (t.Team !== teamCode) return;
@@ -44,6 +60,7 @@ if (!teamCode) {
 
       if (!playerStats[id]) {
         playerStats[id] = {
+          PlayerID: id,
           PlayerName: t.Player,
           PnL: 0,
           Trades: 0,
@@ -64,7 +81,6 @@ if (!teamCode) {
     const allPlayers = Object.keys(playerStats);
     const sortedPlayers = allPlayers.sort((a, b) => playerStats[b].PnL - playerStats[a].PnL);
 
-    // Calculate global ranks
     const globalPnL = {};
     closedData.trades.forEach(t => {
       const id = t.PlayerID;
@@ -78,7 +94,6 @@ if (!teamCode) {
 
     const maxPnL = Math.max(...sortedPlayers.map(pid => playerStats[pid].PnL));
 
-
     sortedPlayers.forEach(playerId => {
       const stats = playerStats[playerId];
       const wallet = queueMap[playerId]?.WalletBalance ?? "-";
@@ -89,20 +104,17 @@ if (!teamCode) {
       div.className = "player-card";
       div.style = "border: 1px solid #ccc; padding: 0.75rem; margin-bottom: 0.5rem; border-radius: 8px;";
       div.innerHTML = `
-  <strong><a href="player-single.html?id=${stats.PlayerID}">${stats.PlayerName}</a></strong><br>
-  Rank: ${rank} | Win %: ${winRate}%<br>
-  Wallet: ₹${wallet} | Net PnL: ₹${stats.PnL.toFixed(2)}
-  <div style="background: lightgray; height: 6px; margin-top: 6px; border-radius: 4px;">
-    <div style="background: green; width: ${Math.max(0, (stats.PnL / maxPnL) * 100)}%; height: 100%; border-radius: 4px;"></div>
-  </div>
-`;
-
+        <strong><a href="player-single.html?id=${playerId}">${stats.PlayerName}</a></strong><br>
+        Rank: ${rank} | Win %: ${winRate}%<br>
+        Wallet: ₹${wallet} | Net PnL: ₹${stats.PnL.toFixed(2)}
+        <div style="background: lightgray; height: 6px; margin-top: 6px; border-radius: 4px;">
+          <div style="background: green; width: ${Math.max(0, (stats.PnL / maxPnL) * 100)}%; height: 100%; border-radius: 4px;"></div>
+        </div>
+      `;
       container.appendChild(div);
     });
-  })
-  .catch(err => {
+  }).catch(err => {
     console.error("Failed to load team data:", err);
     alert("Could not load team profile.");
   });
 }
-

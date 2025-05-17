@@ -152,6 +152,46 @@ if (action === "getPlayerInfo" && e.parameter.id) {
   })).setMimeType(ContentService.MimeType.JSON);
 }
 
+if (action === "getPlayerStats") {
+  const sheet = ss.getSheetByName("StandingsPlayer");
+  const data = sheet.getDataRange().getValues();
+  const headers = data[0];
+
+  const idIndex = headers.indexOf("PlayerID");
+  const nameIndex = headers.indexOf("PlayerName");
+
+  const tradesIndex = headers.indexOf("Trades");
+  const winsIndex = headers.indexOf("Wins");
+  const lossesIndex = headers.indexOf("Losses");
+  const pnlIndex = headers.indexOf("NetPnL");
+
+  const longTradesIndex = headers.indexOf("LongTrades");
+  const longWinsIndex = headers.indexOf("LongWins");
+  const shortTradesIndex = headers.indexOf("ShortTrades");
+  const shortWinsIndex = headers.indexOf("ShortWins");
+
+  const players = {};
+
+  data.slice(1).forEach(row => {
+    players[row[idIndex]] = {
+      PlayerID: row[idIndex],
+      PlayerName: row[nameIndex],
+      Trades: Number(row[tradesIndex]) || 0,
+      Wins: Number(row[winsIndex]) || 0,
+      Losses: Number(row[lossesIndex]) || 0,
+      PnL: Number(row[pnlIndex]) || 0,
+      LongTrades: Number(row[longTradesIndex]) || 0,
+      LongWins: Number(row[longWinsIndex]) || 0,
+      ShortTrades: Number(row[shortTradesIndex]) || 0,
+      ShortWins: Number(row[shortWinsIndex]) || 0
+    };
+  });
+
+  return ContentService.createTextOutput(JSON.stringify(players))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+
   return ContentService.createTextOutput("Invalid request").setMimeType(ContentService.MimeType.TEXT);
 
 }

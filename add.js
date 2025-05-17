@@ -24,15 +24,18 @@ fetch(`${SCRIPT_URL}?action=getQueueStatus`)
     playerDataList = data.queue;
 
     // Add radio buttons for players
-    data.queue.forEach(player => {
-      const label = document.createElement("label");
-      label.innerHTML = `
-        <input type="radio" name="Player" value="${player.PlayerID}">
-        ${player.QueueNumber}. ${player.PlayerName} (${player.Team})
-      `;
-      playerList.appendChild(label);
-      playerList.appendChild(document.createElement("br"));
-    });
+data.queue.forEach(player => {
+  const wrapper = document.createElement("label");
+  wrapper.classList.add("radio-wrapper");
+
+  wrapper.innerHTML = `
+    <input type="radio" name="Player" value="${player.PlayerID}" />
+    <span class="radio-button">${player.QueueNumber}. ${player.PlayerName} (${player.Team})</span>
+  `;
+
+  playerList.appendChild(wrapper);
+});
+
 
     // Handle player selection
     document.querySelectorAll("input[name='Player']").forEach(radio => {
@@ -42,7 +45,6 @@ fetch(`${SCRIPT_URL}?action=getQueueStatus`)
           selectedPlayerData = selected;
           queueDisplay.textContent = selected.QueueNumber;
           walletDisplay.textContent = selected.WalletBalance.toFixed(2);
-          document.getElementById("walletBottomDisplay").textContent = selected.WalletBalance.toFixed(2);
           playerInfo.style.display = "block";
           document.getElementById("walletSummary").style.display = "block";
         }

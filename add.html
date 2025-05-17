@@ -24,7 +24,6 @@
     
   
     <div id="walletSummary" style="margin-top: 20px; font-size: 18px; display: none;">
-      💰 Current Wallet Balance: ₹<span id="walletBottomDisplay">0.00</span>
     </div>
     
   
@@ -32,11 +31,20 @@
       <input type="text" name="Scrip" required>
     </label><br><br>
   
-    <div>
-      <strong>Position Type:</strong><br>
-      <label><input type="radio" name="PositionType" value="Long" checked> Long</label>
-      <label><input type="radio" name="PositionType" value="Short"> Short</label>
-    </div><br>
+<div>
+  <strong>Position Type:</strong>
+  <div class="radio-group">
+    <label class="radio-wrapper">
+      <input type="radio" name="PositionType" value="Long" checked>
+      <span class="radio-button">Long 📈</span>
+    </label>
+    <label class="radio-wrapper">
+      <input type="radio" name="PositionType" value="Short">
+      <span class="radio-button">Short 📉</span>
+    </label>
+  </div>
+</div><br>
+
   
     <label>Stop Loss:
       <input type="number" name="StopLoss" step="0.01">
@@ -52,10 +60,10 @@
   
     <p><strong>Estimated Trade Total:</strong> ₹<span id="estimatedTotal">0</span></p><br>
   
-    <label>
+    <!-- <label>
       <input type="checkbox" name="TeammatePulled" value="TRUE">
       Teammate Pulled?
-    </label><br><br>
+    </label><br><br> -->
   
     <button type="submit">Submit Trade</button>
   </form>
@@ -65,11 +73,13 @@
 
   <p id="submitStatus"></p>
 
-  <div class="navbar">
-    <a href="index.html">🏠<span>Home</span></a>
-    <a href="standings.html">📊<span>Standings</span></a>
-    <a href="add.html" class="plus-button">➕</a>
-  </div>
+<div class="navbar">
+        <a href="index.html">🏠</a>
+        <a href="standings.html">📊</a>
+        <a href="team-single.html">👥</a>
+        <a href="overall.html">🎯</a>
+        <a href="add.html" class="plus-button">➕</a>
+    </div>
   
   
   <!-- Include Google Material Icons -->
