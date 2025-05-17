@@ -125,3 +125,19 @@ document.getElementById("tradeForm").addEventListener("submit", function (e) {
       alert("There was an error submitting the trade.");
     });
 });
+// Load Scrip suggestions from Scrips sheet
+fetch(`${SCRIPT_URL}?action=getScripList`)
+  .then(res => res.json())
+  .then(data => {
+    const scrips = data.scrips || [];
+    const datalist = document.getElementById("scripOptions");
+
+    scrips.forEach(scrip => {
+      const option = document.createElement("option");
+      option.value = scrip;
+      datalist.appendChild(option);
+    });
+  })
+  .catch(err => {
+    console.error("Failed to load scrip suggestions:", err);
+  });
