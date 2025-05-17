@@ -94,6 +94,7 @@ if (!teamCode) {
 
     const maxPnL = Math.max(...sortedPlayers.map(pid => playerStats[pid].PnL));
 
+    
     sortedPlayers.forEach(playerId => {
       const stats = playerStats[playerId];
       const wallet = queueMap[playerId]?.WalletBalance ?? "-";
@@ -103,12 +104,14 @@ if (!teamCode) {
       const div = document.createElement("div");
       div.className = "player-card";
       div.style = "border: 1px solid #ccc; padding: 0.75rem; margin-bottom: 0.5rem; border-radius: 8px;";
+      const barWidth = Math.max(0, (stats.PnL / maxPnL) * 100);
+const barColor = stats.PnL >= 0 ? 'green' : 'crimson';
       div.innerHTML = `
         <strong><a href="player-single.html?id=${playerId}">${stats.PlayerName}</a></strong><br>
         Rank: ${rank} | Win %: ${winRate}%<br>
         Wallet: ₹${wallet} | Net PnL: ₹${stats.PnL.toFixed(2)}
-        <div style="background: lightgray; height: 6px; margin-top: 6px; border-radius: 4px;">
-          <div style="background: green; width: ${Math.max(0, (stats.PnL / maxPnL) * 100)}%; height: 100%; border-radius: 4px;"></div>
+        <div class="bar-bg">
+          <div class="bar-fill" style="width: ${Math.max(0, (stats.PnL / maxPnL) * 100)}%"></div>
         </div>
       `;
       container.appendChild(div);

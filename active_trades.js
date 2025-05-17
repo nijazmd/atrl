@@ -47,12 +47,33 @@ function closeTrade(tradeId, button) {
 
   if (!confirm(`Close trade at ₹${exitPrice}?`)) return;
 
+  // 🧠 Get the full trade object from the UI
+  const card = button.closest(".trade-card");
+  const playerLine = card.querySelector("p strong").textContent; // Team - Player
+  const scrip = card.querySelector("p:nth-child(2)").textContent.split(":")[1].trim();
+  const positionType = card.querySelector("p:nth-child(3) span").textContent;
+  const qtyLine = card.querySelector("p:nth-child(4)").textContent;
+
+  const qty = parseFloat(qtyLine.split("Qty:")[1].split("×")[0].trim());
+  const entryPrice = parseFloat(qtyLine.split("× ₹")[1].split(" =")[0].trim());
+
+  // 🧮 Compute derived values
+  const pnl = (qty * (exitPrice - entryPrice)) * (positionType === "Long" ? 1 : -1);
+  const entryValue = qty * entryPrice;
+  const capitalUsed = entryValue;
+  const pnlPercent = entryValue ? (pnl / entryValue) * 100 : 0;
+
+  // 📨 Send to server
   fetch(API_URL, {
     method: "POST",
     body: new URLSearchParams({
       action: "closeTrade",
       TradeID: tradeId,
-      ExitPrice: exitPrice
+      ExitPrice: exitPrice,
+      PnL: pnl.toFixed(2),
+      EntryValue: entryValue.toFixed(2),
+      CapitalUsed: capitalUsed.toFixed(2),
+      PnLPercent: pnlPercent.toFixed(2)
     })
   })
     .then(res => res.text())
@@ -65,3 +86,4 @@ function closeTrade(tradeId, button) {
       alert("Failed to close trade.");
     });
 }
+

@@ -46,7 +46,6 @@ data.queue.forEach(player => {
           queueDisplay.textContent = selected.QueueNumber;
           walletDisplay.textContent = selected.WalletBalance.toFixed(2);
           playerInfo.style.display = "block";
-          document.getElementById("walletSummary").style.display = "block";
         }
       });
       
@@ -90,6 +89,27 @@ document.getElementById("tradeForm").addEventListener("submit", function (e) {
   formData.set("PlayerID", playerData.PlayerID); // for internal matching
   formData.set("Team", playerData.Team);
   formData.set("QueueNumber", playerData.QueueNumber);
+
+  const qty = parseFloat(formData.get("Quantity")) || 0;
+  const entry = parseFloat(formData.get("EntryPrice")) || 0;
+  const exit = parseFloat(formData.get("ExitPrice")) || 0;
+  const pnl = parseFloat(formData.get("PnL")) || (qty * (exit - entry));
+
+  const entryValue = qty * entry;
+  const capitalUsed = entryValue;
+  const pnlPercent = entryValue ? (pnl / entryValue) * 100 : 0;
+
+  document.getElementById("entryValueHidden").value = entryValue.toFixed(2);
+  document.getElementById("capitalUsedHidden").value = capitalUsed.toFixed(2);
+  document.getElementById("pnlPercentHidden").value = pnlPercent.toFixed(2);
+
+  formData.set("EntryValue", entryValue.toFixed(2));
+  formData.set("CapitalUsed", capitalUsed.toFixed(2));
+  formData.set("PnLPercent", pnlPercent.toFixed(2));
+
+  for (const [key, value] of formData.entries()) {
+  console.log(`${key}: ${value}`);
+}
 
   fetch(SCRIPT_URL, {
     method: "POST",

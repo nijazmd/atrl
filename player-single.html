@@ -9,29 +9,53 @@
 <body>
   <h2 id="playerName">Player Name</h2>
   <div class="card-grid">
-   <div class="card">Team: <span id="teamName"></span></div>
-   <div class="card">Wallet Balance: ₹<span id="walletBalance"></span></div>
+   <div class="card">Team<span id="teamName"></span></div>
+   <div class="card">Wallet<span id="walletBalance"></span></div>
   </div>
 
   <h3>Standings</h3>
   <div class="card-grid">
-   <div class="card"> Rank: <span id="rank"></span></div>
-   <div class="card">Total Trades: <span id="totalTrades"></span></div>
-   <div class="card">Wins: <span id="wins"></span></div>
-   <div class="card">Losses: <span id="losses"></span></div>
-   <div class="card">Win %: <span id="winRate"></span>%</div>
+   <div class="card"> Rank<span id="rank"></span></div>
+   <div class="card">Total Trades<span id="totalTrades"></span></div>
+   <div class="card">Wins<span id="wins"></span></div>
+   <div class="card">Losses<span id="losses"></span></div>
+   <div class="card">Win %<span id="winRate"></span>%</div>
   </div>
 
   <h3>Trade Type Stats</h3>
   <div class="card-grid">
-   <div class="card">Total Long Trades: <span id="longCount"></span> (<span id="longWinRate"></span>% win)</div>
-   <div class="card">Total Short Trades: <span id="shortCount"></span> (<span id="shortWinRate"></span>% win)</div>
+   <div class="card">Total Long Trades<span id="longCount"></span>w%<span id="longWinRate"></span></div>
+   <div class="card">Total Short Trades<span id="shortCount"></span>w%<span id="shortWinRate"></span></div>
   </div>
 
   <h3>Total PnL</h3>
   <div class="card-grid">
-   <div class="card">Net PnL: ₹<span id="totalPnL"></span></div>
+   <div class="card">Net PnL<span id="totalPnL"></span></div>
   </div>
+
+  <h3>📜 Trade History</h3>
+<div class="table-wrapper">
+  <table id="tradeHistoryTable">
+  <thead>
+    <tr>
+      <th onclick="sortTable(0)">Round</th>
+      <th onclick="sortTable(1)">PnL%</th>
+      <th onclick="sortTable(2)">PnL</th>
+      <th>Scrip</th>
+      <th>Type</th>
+      <th onclick="sortTable(5)">Qty</th>
+      <th>Entry</th>
+      <th>Entry ₹</th>
+      <th>Exit</th>
+      <th>Exit ₹</th>
+      <th>Wallet</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+</div>
+
 
 <div class="navbar">
         <a href="index.html">🏠</a>

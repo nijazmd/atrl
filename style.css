@@ -30,11 +30,13 @@ h2, h3 {
   margin: 1rem 0.5rem;
 }
 .card {
+  display: flex;
+  flex-direction: column;
   background: #1f1f3a;
-  color: white;
+  color: #6e6fa1;
   padding: 1rem;
   border-radius: 14px;
-  font-size: 0.95rem;
+  font-size: 0.8rem;
   box-shadow: 0 0 8px rgba(0,0,0,0.25);
   animation: fadeIn 0.5s ease;
 }
@@ -174,7 +176,7 @@ table {
   background: #1c1f4a;
   border-radius: 12px;
   overflow-x: auto;
-  display: block;
+  /* display: block; */
 }
 th, td {
   padding: 0.75rem;
@@ -234,7 +236,7 @@ input[type="radio"]:checked + .radio-button {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
-  padding: 0 1rem;
+  /* padding: 0 1rem; */
 }
 .radio-wrapper {
   display: inline-block;
@@ -290,6 +292,100 @@ input[type="radio"]:checked + .radio-button {
   border-color: #256be6;
 }
 
+.bar-bg {
+  background: lightgray;
+  height: 6px;
+  border-radius: 4px;
+  margin-top: 6px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.bar-fill {
+  background: green;
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  margin: 1rem 0;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+th, td {
+  padding: 0.6rem;
+  text-align: left;
+  white-space: nowrap;
+}
+thead {
+  background: #2e3264;
+}
+tbody tr:nth-child(even) {
+  background: #1c1f4a;
+}
+tbody tr:nth-child(odd) {
+  background: #24285e;
+}
+#tradeHistoryTable td {
+  text-align: center;
+}
+#tradeHistoryTable td:nth-child(3) {
+  font-weight: bold;
+}
+#tradeHistoryTable tr:nth-child(even) {
+  background-color: #1b1d3a;
+}
+#tradeHistoryTable tr:nth-child(odd) {
+  background-color: #2a2c4d;
+}
+#tradeHistoryTable tr:hover {
+  background-color: #394278;
+}
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.full-width {
+  grid-column: span 2;
+}
+
+label {
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+input[type="text"],
+input[type="number"] {
+  padding: 0.5rem;
+  border-radius: 6px;
+  border: 1px solid #555;
+  background-color: #222;
+  color: #eee;
+}
+
+button[type="submit"] {
+  padding: 0.75rem;
+  border: none;
+  border-radius: 6px;
+  background-color: #2e8b57;
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+
+
 .version {
   font-size: 12px;
   color:#3c2b9c;
@@ -302,15 +398,4 @@ input[type="radio"]:checked + .radio-button {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* RESPONSIVE */
-@media (max-width: 600px) {
-  .card-grid {
-    grid-template-columns: 1fr;
-  }
-  .card {
-    margin: 0.5rem 0;
-  }
-  .form-row {
-    flex-direction: column;
-  }
-}
+

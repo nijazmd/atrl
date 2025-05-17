@@ -53,6 +53,44 @@ if (!playerId) {
       document.getElementById("shortWinRate").textContent = shortWinRate;
       document.getElementById("totalPnL").textContent = pnl.toFixed(2);
 
+      const tbody = document.querySelector("#tradeHistoryTable tbody");
+trades.forEach(t => {
+  const row = document.createElement("tr");
+
+const qty = parseFloat(t.Qty) || 0;
+const entry = parseFloat(t.EntryPrice) || 0;
+const exit = parseFloat(t.ExitPrice) || 0;
+const pnl = parseFloat(t.PnL) || 0;
+const entryTotal = parseFloat(t.EntryValue) || (qty * entry);
+const exitTotal = parseFloat(t.ExitValue) || (qty * exit);
+const pnlPercent = parseFloat(t.PnLPercent) || (entryTotal ? ((pnl / entryTotal) * 100) : 0);
+
+  row.innerHTML = `
+  <td>${t.RoundNumber}</td>
+  <td>${pnlPercent.toFixed(2)}%</td>
+  <td>₹${pnl.toFixed(2)}</td>
+  <td>${t.Scrip}</td>
+  <td>${t.PositionType}</td>
+  <td>${qty}</td>
+  <td>${entry.toFixed(2)}</td>
+  <td>₹${entryTotal.toFixed(2)}</td>
+  <td>${exit.toFixed(2)}</td>
+  <td>₹${exitTotal.toFixed(2)}</td>
+  <td>₹${parseFloat(t.WalletBalanceAfterTrade || 0).toFixed(2)}</td>
+`;
+
+if (pnl > 0) {
+  row.style.backgroundColor = "#163c2f"; // green-ish
+} else if (pnl < 0) {
+  row.style.backgroundColor = "#3b1e1e"; // red-ish
+} else {
+  row.style.backgroundColor = "#2c2c2c"; // neutral gray
+}
+
+  tbody.appendChild(row);
+});
+
+
       // Fetch all player PnLs for rank
       fetch(`${API_URL}?action=getClosedTrades`)
         .then(res => res.json())
@@ -74,4 +112,23 @@ if (!playerId) {
       console.error("Failed to load player info:", err);
       alert("Could not load player profile.");
     });
+}
+
+function sortTable(colIndex) {
+  const table = document.getElementById("tradeHistoryTable");
+  const tbody = table.querySelector("tbody");
+  const rows = Array.from(tbody.rows);
+
+  const isNumeric = !isNaN(parseFloat(rows[0].cells[colIndex].innerText.replace(/[₹,%]/g, '')));
+  const sorted = rows.sort((a, b) => {
+    const aText = a.cells[colIndex].innerText.replace(/[₹,%]/g, '');
+    const bText = b.cells[colIndex].innerText.replace(/[₹,%]/g, '');
+
+    const aVal = isNumeric ? parseFloat(aText) : aText;
+    const bVal = isNumeric ? parseFloat(bText) : bText;
+
+    return aVal > bVal ? -1 : 1; // descending
+  });
+
+  rows.forEach(row => tbody.appendChild(row));
 }

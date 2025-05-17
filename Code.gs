@@ -41,75 +41,68 @@ function doGet(e) {
       .setMimeType(ContentService.MimeType.JSON);
   }
 
-  if (action === "getQueueStatus") {
-    const roundsMeta = ss.getSheetByName("RoundsMeta").getDataRange().getValues();
-    const latestRound = roundsMeta[roundsMeta.length - 1][0];
+if (action === "getQueueStatus") {
+  const roundsMeta = ss.getSheetByName("RoundsMeta").getDataRange().getValues();
+  const latestRound = roundsMeta[roundsMeta.length - 1][0];
 
-    const playerSheet = ss.getSheetByName("TeamPlayerMap");
-    const activeSheet = ss.getSheetByName("ActiveTrades");
-    const standingsSheet = ss.getSheetByName("StandingsPlayer");
+  const playerSheet = ss.getSheetByName("TeamPlayerMap");
+  const activeSheet = ss.getSheetByName("ActiveTrades");
+  const standingsSheet = ss.getSheetByName("StandingsPlayer");
 
-    const players = playerSheet.getDataRange().getValues();
-    const active = activeSheet.getDataRange().getValues();
-    const standings = standingsSheet.getDataRange().getValues();
+  const players = playerSheet.getDataRange().getValues();
+  const active = activeSheet.getDataRange().getValues();
+  const standings = standingsSheet.getDataRange().getValues();
 
-    const playerHeaders = players[0];
-    const activeHeaders = active[0];
-    const standingsHeaders = standings[0];
+  const playerHeaders = players[0];
+  const activeHeaders = active[0];
+  const standingsHeaders = standings[0];
 
-    const idIndex = playerHeaders.indexOf("PlayerID");
-    const nameIndex = playerHeaders.indexOf("PlayerName");
-    const teamIndex = playerHeaders.indexOf("Team");
-    const queueIndex = playerHeaders.indexOf("PlayerOrder");
+  const idIndex = playerHeaders.indexOf("PlayerID");
+  const nameIndex = playerHeaders.indexOf("PlayerName");
+  const teamIndex = playerHeaders.indexOf("Team");
+  const queueIndex = playerHeaders.indexOf("PlayerOrder");
 
-    const walletMap = {};
-    const queueEntries = [];
+  const walletIndex = standingsHeaders.indexOf("WalletBalance");
+  const standingsIdIndex = standingsHeaders.indexOf("PlayerID");
 
-    const walletIndex = standingsHeaders.indexOf("WalletBalance");
-    const standingsIdIndex = standingsHeaders.indexOf("PlayerID");
+  const activeRoundIndex = activeHeaders.indexOf("RoundNumber");
+  const activePlayerIdIndex = activeHeaders.indexOf("PlayerID");
 
-    standings.slice(1).forEach(row => {
-      walletMap[row[standingsIdIndex]] = parseFloat(row[walletIndex]) || 0;
-    });
-
-    const activeRoundIndex = activeHeaders.indexOf("RoundNumber");
-    const activePlayerIndex = activeHeaders.indexOf("Player");
-    const isClosedIndex = activeHeaders.indexOf("IsClosed");
-
-  const playerIdIndex = activeHeaders.indexOf("PlayerID");
-
+  // ✅ Exclude players in ActiveTrades of this round — no matter closed or not
   const tradedPlayers = new Set(
     active.slice(1)
-      .filter(row =>
-        row[activeRoundIndex] === latestRound &&
-        row[isClosedIndex].toString().toUpperCase() === "TRUE"
-      )
-      .map(row => row[playerIdIndex])
+      .filter(row => row[activeRoundIndex] === latestRound)
+      .map(row => String(row[activePlayerIdIndex]))
   );
 
+  const walletMap = {};
+  standings.slice(1).forEach(row => {
+    walletMap[row[standingsIdIndex]] = parseFloat(row[walletIndex]) || 0;
+  });
 
+  const queueEntries = [];
 
+  players.slice(1).forEach(row => {
+    const id = String(row[idIndex]);
+    if (!tradedPlayers.has(id)) {
+      queueEntries.push({
+        PlayerID: id,
+        PlayerName: row[nameIndex],
+        Team: row[teamIndex],
+        QueueNumber: parseInt(row[queueIndex]),
+        WalletBalance: walletMap[id] || 0
+      });
+    }
+  });
 
-    players.slice(1).forEach(row => {
-      const id = row[idIndex];
-      if (!tradedPlayers.has(id)) {
-        queueEntries.push({
-          PlayerID: id,
-          PlayerName: row[nameIndex],
-          Team: row[teamIndex],
-          QueueNumber: parseInt(row[queueIndex]),
-          WalletBalance: walletMap[id] || 0
-        });
-      }
-    });
+  queueEntries.sort((a, b) => a.QueueNumber - b.QueueNumber);
 
-    queueEntries.sort((a, b) => a.QueueNumber - b.QueueNumber);
+  return ContentService.createTextOutput(JSON.stringify({
+    round: latestRound,
+    queue: queueEntries.slice(0, 5)
+  })).setMimeType(ContentService.MimeType.JSON);
+}
 
-    return ContentService.createTextOutput(JSON.stringify({
-      round: latestRound,
-      queue: queueEntries.slice(0, 5)
-    })).setMimeType(ContentService.MimeType.JSON);
-  }
 
 if (action === "getPlayerInfo" && e.parameter.id) {
   const playerId = e.parameter.id;
@@ -243,7 +236,18 @@ function doPost(e) {
 
             const completedHeaders = completedSheet.getRange(1, 1, 1, completedSheet.getLastColumn()).getValues()[0];
             const completedIndexes = Object.fromEntries(completedHeaders.map((h, i) => [h, i]));
-            const completedRow = completedHeaders.map(header => row[indexes[header]] || "");
+            const completedRow = completedHeaders.map(header => {
+            if (header in e.parameter) {
+              // Format PnLPercent if needed
+              if (header === "PnLPercent") {
+                return parseFloat(e.parameter[header]).toFixed(2);
+              }
+              return e.parameter[header];
+            }
+            if (header in indexes) return row[indexes[header]];
+            return "";
+          });
+
 
             completedRow[completedIndexes["ExitPrice"]] = exitPrice;
             completedRow[completedIndexes["ExitValue"]] = exitTotal;
@@ -261,6 +265,39 @@ function doPost(e) {
     }
     return ContentService.createTextOutput("Trade ID not found.");
   }
+
+  if (action === "startNextRound") {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const roundsSheet = ss.getSheetByName("RoundsMeta");
+  const standingsSheet = ss.getSheetByName("StandingsPlayer");
+
+  const capital = parseFloat(e.parameter.capital);
+  if (isNaN(capital) || capital <= 0) {
+    return ContentService.createTextOutput("Invalid capital value.");
+  }
+
+  const roundsData = roundsSheet.getDataRange().getValues();
+  const headers = roundsData[0];
+  const roundIndex = headers.indexOf("RoundNumber");
+  const capitalIndex = headers.indexOf("CapitalPerPlayer");
+
+  const lastRoundRow = roundsData[roundsData.length - 1];
+  const nextRound = parseInt(lastRoundRow[roundIndex]) + 1;
+
+  roundsSheet.appendRow([nextRound, new Date(), capital]);
+
+  const standingsData = standingsSheet.getDataRange().getValues();
+  const standingsHeaders = standingsData[0];
+  const walletIndex = standingsHeaders.indexOf("WalletBalance");
+
+  for (let i = 1; i < standingsData.length; i++) {
+    let current = parseFloat(standingsData[i][walletIndex]) || 0;
+    standingsSheet.getRange(i + 1, walletIndex + 1).setValue(current + capital);
+  }
+
+  return ContentService.createTextOutput("Next round added and wallets updated.");
+}
+
 
   const headers = activeSheet.getRange(1, 1, 1, activeSheet.getLastColumn()).getValues()[0];
   const newRow = headers.map(header => e.parameter[header] || "");
@@ -289,6 +326,34 @@ function doPost(e) {
   }
 
   activeSheet.appendRow(newRow);
+    if (action === "nextRound") {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const roundsSheet = ss.getSheetByName("RoundsMeta");
+    const standingsSheet = ss.getSheetByName("StandingsPlayer");
+
+    const roundsData = roundsSheet.getDataRange().getValues();
+    const lastRound = parseInt(roundsData[roundsData.length - 1][0]);
+    const newRound = lastRound + 1;
+    const capitalPerPlayer = parseFloat(roundsData[roundsData.length - 1][2]);
+
+    // Add new round to RoundsMeta
+    const today = new Date();
+    roundsSheet.appendRow([newRound, today, capitalPerPlayer]);
+
+    // Update wallets
+    const standingsData = standingsSheet.getDataRange().getValues();
+    const headers = standingsData[0];
+    const walletIndex = headers.indexOf("WalletBalance");
+
+    for (let i = 1; i < standingsData.length; i++) {
+      let currentWallet = parseFloat(standingsData[i][walletIndex]) || 0;
+      let updatedWallet = currentWallet + capitalPerPlayer;
+      standingsSheet.getRange(i + 1, walletIndex + 1).setValue(updatedWallet);
+    }
+
+    return ContentService.createTextOutput("Next round added and wallets updated.");
+  }
+
   return ContentService.createTextOutput("Trade added and wallet updated.");
 }
 
