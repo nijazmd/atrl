@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Scrip Details</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <h2>Scrip Details</h2>
+
+  <!-- 🔘 Scrip Selection -->
+  <div id="scripRadioContainer" class="radio-scroll-row">
+    <!-- Populated dynamically -->
+  </div>
+
+  <!-- 📊 Summary Stats -->
+  <h3>📊 Scrip Summary</h3>
+  <div class="card-grid">
+    <div class="card">Trades <span id="totalTrades"></span></div>
+    <div class="card">Wins <span id="wins"></span></div>
+    <div class="card">Losses <span id="losses"></span></div>
+    <div class="card">Win %: <span id="winRate"></span>%</div>
+  </div>
+
+  <!-- 📈 Type Stats -->
+  <h3>📈 Trade Type Stats</h3>
+  <div class="card-grid">
+    <div class="card">Long<span id="longTrades"></span> w%<span id="longWinRate"></span></div>
+    <div class="card">Short<span id="shortTrades"></span> w%<span id="shortWinRate"></span></div>
+  </div>
+
+  <!-- 📜 Trade History Table -->
+  <h3>📜 Trade History</h3>
+  <div class="table-wrapper">
+    <table id="scripTradeTable">
+      <thead>
+        <tr>
+            <th>PnL%</th>
+            <th>PnL</th>
+          <th>Round</th>
+          <th>Player</th>
+          <th>Team</th>
+          <th>Position</th>
+          <th>Qty</th>
+          <th>Entry</th>
+          <th>Exit</th>
+          <th>Wallet</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+<div class="navbar">
+    <a href="index.html">🏠</a>
+    <a href="standings.html">📊</a>
+    <a href="team-single.html">👥</a>
+    <a href="scrip.html">₿</a>
+    <a href="overall.html">🎯</a>
+    <a href="add.html" class="plus-button">➕</a>
+</div>
+
+  <script src="scrip.js"></script>
+</body>
+</html>

@@ -69,7 +69,7 @@ const pnlPercent = parseFloat(t.PnLPercent) || (entryTotal ? ((pnl / entryTotal)
   <td>${t.RoundNumber}</td>
   <td>${pnlPercent.toFixed(2)}%</td>
   <td>₹${pnl.toFixed(2)}</td>
-  <td>${t.Scrip}</td>
+  <td><a href="scrip.html?s=${t.Scrip}">${t.Scrip}</a></td>
   <td>${t.PositionType}</td>
   <td>${qty}</td>
   <td>${entry.toFixed(2)}</td>
