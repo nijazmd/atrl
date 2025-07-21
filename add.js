@@ -90,7 +90,7 @@ document.getElementById("tradeForm").addEventListener("submit", function (e) {
   formData.set("Team", playerData.Team);
   formData.set("QueueNumber", playerData.QueueNumber);
 
-  const qty = parseFloat(formData.get("Quantity")) || 0;
+  const qty = parseFloat(formData.get("Qty")) || 0;
   const entry = parseFloat(formData.get("EntryPrice")) || 0;
   const exit = parseFloat(formData.get("ExitPrice")) || 0;
   const pnl = parseFloat(formData.get("PnL")) || (qty * (exit - entry));
