@@ -45,6 +45,13 @@ h2, h3 {
   font-weight: bold;
   color: #fff;
 }
+.card.multiline span {
+  display: block;
+}
+.card span.labelspan {
+  color: #6e6fa2;
+  font-size: .8rem;
+}
 
 /* PLAYER CARDS */
 .player-card {

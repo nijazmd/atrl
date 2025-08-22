@@ -10,134 +10,78 @@ const roundInput = document.getElementById("roundNumber");
 const qtyInput = document.getElementById("qtyInput");
 const entryPriceInput = document.getElementById("entryPriceInput");
 
-let selectedPlayerData = null;
+let playerDataList = [];
+let roundCapital = 0;
 
-let playerDataList = []; // store full queue info for later use
-
-
-// Load latest round and next 5 players
-fetch(`${SCRIPT_URL}?action=getQueueStatus`)
-  .then(res => res.json())
-  .then(data => {
-    roundInput.value = data.round;
-
-    playerDataList = data.queue;
-
-    // Add radio buttons for players
-data.queue.forEach(player => {
-  const wrapper = document.createElement("label");
-  wrapper.classList.add("radio-wrapper");
-
-  wrapper.innerHTML = `
-    <input type="radio" name="Player" value="${player.PlayerID}" />
-    <span class="radio-button">${player.QueueNumber}. ${player.PlayerName} (${player.Team})</span>
-  `;
-
-  playerList.appendChild(wrapper);
-});
-
-
-    // Handle player selection
-    document.querySelectorAll("input[name='Player']").forEach(radio => {
-      radio.addEventListener("change", function () {
-        const selected = playerDataList.find(p => String(p.PlayerID) === this.value);
-        if (selected) {
-          selectedPlayerData = selected;
-          queueDisplay.textContent = selected.QueueNumber;
-          walletDisplay.textContent = selected.WalletBalance.toFixed(2);
-          playerInfo.style.display = "block";
-        }
-      });
-      
-    });
-  })
-  .catch(err => {
-    console.error("Error fetching queue status:", err);
-    alert("Failed to load player queue.");
-  });
-
-// Live update of estimated trade total
 function updateEstimatedTotal() {
   const qty = parseFloat(qtyInput.value) || 0;
   const price = parseFloat(entryPriceInput.value) || 0;
   estimatedTotal.textContent = (qty * price).toFixed(2);
 }
-
 qtyInput.addEventListener("input", updateEstimatedTotal);
 entryPriceInput.addEventListener("input", updateEstimatedTotal);
 
-// Submit trade
-document.getElementById("tradeForm").addEventListener("submit", function (e) {
-  e.preventDefault();
+// Load queue + cap
+fetch(`${SCRIPT_URL}?action=getQueueStatus`)
+  .then(r => r.json())
+  .then(({ round, capital, queue }) => {
+    roundInput.value = round;
+    roundCapital = Number(capital || 0);
 
-  const selectedRadio = document.querySelector("input[name='Player']:checked");
-  if (!selectedRadio) {
-    alert("Please select a player.");
-    return;
-  }
-
-  const selectedPlayerID = selectedRadio.value;
-  const playerData = playerDataList.find(p => String(p.PlayerID) === String(selectedPlayerID));
-
-  if (!playerData) {
-    alert("Player data not found.");
-    return;
-  }
-
-  const formData = new FormData(e.target);
-  formData.set("Player", playerData.PlayerName); // human readable
-  formData.set("PlayerID", playerData.PlayerID); // for internal matching
-  formData.set("Team", playerData.Team);
-  formData.set("QueueNumber", playerData.QueueNumber);
-
-  const qty = parseFloat(formData.get("Qty")) || 0;
-  const entry = parseFloat(formData.get("EntryPrice")) || 0;
-  const exit = parseFloat(formData.get("ExitPrice")) || 0;
-  const pnl = parseFloat(formData.get("PnL")) || (qty * (exit - entry));
-
-  const entryValue = qty * entry;
-  const capitalUsed = entryValue;
-  const pnlPercent = entryValue ? (pnl / entryValue) * 100 : 0;
-
-  document.getElementById("entryValueHidden").value = entryValue.toFixed(2);
-  document.getElementById("capitalUsedHidden").value = capitalUsed.toFixed(2);
-  document.getElementById("pnlPercentHidden").value = pnlPercent.toFixed(2);
-
-  formData.set("EntryValue", entryValue.toFixed(2));
-  formData.set("CapitalUsed", capitalUsed.toFixed(2));
-  formData.set("PnLPercent", pnlPercent.toFixed(2));
-
-  for (const [key, value] of formData.entries()) {
-  console.log(`${key}: ${value}`);
-}
-
-  fetch(SCRIPT_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams(formData)
-  })
-    .then(() => {
-      alert("Trade submitted successfully!");
-      location.reload();
-    })
-    .catch(error => {
-      console.error("Submit error:", error);
-      alert("There was an error submitting the trade.");
+    playerDataList = queue;
+    queue.forEach(p => {
+      const wrap = document.createElement("label");
+      wrap.className = "radio-wrapper";
+      wrap.innerHTML = `
+        <input type="radio" name="Player" value="${p.PlayerID}">
+        <span class="radio-button">${p.QueueNumber}. ${p.PlayerName} (${p.Team})</span>
+      `;
+      playerList.appendChild(wrap);
     });
-});
-// Load Scrip suggestions from Scrips sheet
-fetch(`${SCRIPT_URL}?action=getScripList`)
-  .then(res => res.json())
-  .then(data => {
-    const scrips = data.scrips || [];
-    const datalist = document.getElementById("scripOptions");
 
-    scrips.forEach(scrip => {
-      const option = document.createElement("option");
-      option.value = scrip;
-      datalist.appendChild(option);
+    document.querySelectorAll("input[name='Player']").forEach(radio => {
+      radio.addEventListener("change", e => {
+        const p = playerDataList.find(x => String(x.PlayerID)===e.target.value);
+        if (!p) return;
+        playerInfo.style.display = "block";
+        queueDisplay.textContent = p.QueueNumber;
+        walletDisplay.textContent = (p.WalletBalance||0).toFixed(2);
+      });
     });
-  })
-  .catch(err => {
-    console.error("Failed to load scrip suggestions:", err);
   });
+
+// Submit = create grouped trade with first leg
+document.getElementById("tradeForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const sel = document.querySelector("input[name='Player']:checked");
+  if (!sel) return alert("Please select a player.");
+
+  const p = playerDataList.find(x => String(x.PlayerID)===sel.value);
+  if (!p) return alert("Player not found.");
+
+  const fd = new FormData(e.target);
+  const qty = Number(fd.get("Qty")||0);
+  const entry = Number(fd.get("EntryPrice")||0);
+  const entryTotal = qty * entry;
+  if (qty<=0 || entry<=0) return alert("Qty/Entry must be > 0.");
+  if (roundCapital && entryTotal > roundCapital) return alert("This entry exceeds round capital.");
+
+  const body = new URLSearchParams({
+    action: "createTrade",
+    Team: p.Team,
+    PlayerID: p.PlayerID,
+    Player: p.PlayerName,
+    QueueNumber: p.QueueNumber,
+    Scrip: fd.get("Scrip"),
+    PositionType: fd.get("PositionType"),
+    StopLoss: fd.get("StopLoss") || "",
+    Qty: String(qty),
+    EntryPrice: String(entry)
+  });
+
+  const res = await fetch(SCRIPT_URL, { method: "POST", body });
+  const j = await res.json();
+  if (!j.ok) return alert(j.error || "Failed to create trade.");
+  alert("Trade created (leg #1).");
+  location.href = "index.html";
+});
