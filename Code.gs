@@ -152,10 +152,116 @@ function _groupOpenTrades(){
 }
 
 /** =========================
- *  GET HANDLERS (kept + new)
+ *  GET HANDLERS
  *  ========================= */
 function doGet(e){
   const action = e.parameter.action;
+
+  // --- NEW: getQueueStatus (robust, always returns queue array and round) ---
+  // --- FIXED: getQueueStatus — prefer players with fewer completed rounds ----
+  if (action === "getQueueStatus") {
+    try {
+      // Current round (from RoundsMeta; fallback to latest round seen in ActiveTrades)
+      const {rows: rRows, headers: rH} = _getAll_("RoundsMeta");
+      const rMap = _idxMap(rH);
+      let round = 0;
+      if (rRows.length) {
+        round = Number(rRows[rRows.length - 1][rMap["RoundNumber"]]) || 0;
+      }
+      if (!round) {
+        const {headers: aHh, rows: aRows} = _getAll_(ACTIVE_TRADES_SHEET);
+        const aH = _idxMap(aHh);
+        round = aRows.reduce((m, r) => {
+          const lt = String(r[aH["LegType"]] || "").toUpperCase();
+          const isEntry = (aH["LegType"] === undefined) || lt !== "EXIT";
+          return isEntry ? Math.max(m, Number(r[aH["RoundNumber"]]) || 0) : m;
+        }, 0) || 1;
+      }
+
+      const capital = _getRoundCapByRound(round);
+
+      // Sheets
+      const {headers: mHh, rows: mRows} = _getAll_(TEAM_PLAYER_MAP_SHEET);
+      const mH = _idxMap(mHh);
+      const {headers: sHh, rows: sRows} = _getAll_("StandingsPlayer");
+      const sH = _idxMap(sHh);
+      const {headers: aHh, rows: aRows} = _getAll_(ACTIVE_TRADES_SHEET);
+      const aH = _idxMap(aHh);
+
+      // Teams already trading this round (exclude)
+      const teamsWithOpen = new Set(
+        aRows.filter(r =>
+          Number(r[aH["RoundNumber"]]) === round &&
+          String(r[aH["IsClosed"]]).toUpperCase() !== "TRUE" &&
+          (aH["LegType"] === undefined || String(r[aH["LegType"]]).toUpperCase() !== "EXIT")
+        ).map(r => String(r[aH["Team"]]))
+      );
+
+      // Wallet lookup by PlayerID
+      const walletById = {};
+      sRows.forEach(r => {
+        const pid = String(r[sH["PlayerID"]]);
+        walletById[pid] = Number(r[sH["WalletBalance"]]) || 0;
+      });
+
+      // How many rounds each player has completed (from CompletedTrades)
+      const {headers: cHh, rows: cRows} = _getAll_("CompletedTrades");
+      const cH = _idxMap(cHh);
+      const pidIdx = cH["PlayerID"];
+      const rndIdx = cH["RoundNumber"];
+      const roundsByPlayer = {}; // pid -> Set of round numbers (distinct)
+      if (pidIdx !== undefined) {
+        cRows.forEach(r => {
+          const pid = String(r[pidIdx] || "");
+          if (!pid) return;
+          const rnd = (rndIdx !== undefined) ? Number(r[rndIdx] || 0) : 0;
+          if (!roundsByPlayer[pid]) roundsByPlayer[pid] = new Set();
+          // If RoundNumber column exists, count distinct rounds; else count rows
+          roundsByPlayer[pid].add(rndIdx !== undefined ? rnd || roundsByPlayer[pid].size + 1 : (roundsByPlayer[pid].size + 1));
+        });
+      }
+      const completedCount = (pid) => (roundsByPlayer[pid] ? roundsByPlayer[pid].size : 0);
+
+      // Column fallbacks on TeamPlayerMap
+      const nameIdx  = (mH["PlayerName"] ?? mH["Player"] ?? -1);
+      const idIdx    = (mH["PlayerID"] ?? mH["PlayerId"] ?? -1);
+      const teamIdx  = (mH["Team"] ?? -1);
+      const orderIdx = (mH["PlayerOrder"] ?? mH["QueueNumber"] ?? mH["Order"] ?? -1);
+
+      // Build, filter, and sort by CompletedRounds asc
+      const candidates = mRows.map(r => {
+        const PlayerID = idIdx >= 0 ? String(r[idIdx]) : "";
+        const PlayerName = nameIdx >= 0 ? String(r[nameIdx]) : "";
+        const Team = teamIdx >= 0 ? String(r[teamIdx]) : "";
+        const QueueNumber = orderIdx >= 0 ? Number(r[orderIdx]) || 0 : 0;
+        const CompletedRounds = completedCount(PlayerID);
+        return { PlayerID, PlayerName, Team, QueueNumber, CompletedRounds };
+      });
+
+      const queue = candidates
+        .filter(p => p.PlayerID && p.Team && !teamsWithOpen.has(p.Team))
+        .sort((a, b) =>
+          (a.CompletedRounds - b.CompletedRounds) ||
+          ((a.QueueNumber || 9999) - (b.QueueNumber || 9999)) ||
+          String(a.PlayerName).localeCompare(String(b.PlayerName))
+        )
+        .slice(0, 5)
+        .map((p, i) => ({
+          ...p,
+          NextRank: i + 1,
+          WalletBalance: walletById[p.PlayerID] || 0
+        }));
+
+      return ContentService
+        .createTextOutput(JSON.stringify({ ok: true, round, capital, queue }))
+        .setMimeType(ContentService.MimeType.JSON);
+    } catch (err) {
+      return ContentService
+        .createTextOutput(JSON.stringify({ ok: false, error: String(err), round: 0, capital: 0, queue: [] }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+  }
+
 
   // --- NEW: grouped active view ---
   if (action === "getActiveGroupedTrades") {
@@ -187,63 +293,69 @@ function doGet(e){
       .setMimeType(ContentService.MimeType.JSON);
   }
 
-  // --- EXISTING: getTrades / getClosedTrades ---
+  // --- UPDATED: getTrades / getClosedTrades ---
   if (action === "getTrades" || action === "getClosedTrades") {
-    const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(ACTIVE_TRADES_SHEET);
-    const data = sheet.getDataRange().getValues();
-    const headers = data[0];
-    const isClosedIndex = headers.indexOf("IsClosed");
-    const targetStatus = action === "getClosedTrades" ? "TRUE" : "FALSE";
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
 
-    const trades = data.slice(1)
-      .filter(row => row[isClosedIndex].toString().toUpperCase() === targetStatus)
-      .map(row => Object.fromEntries(headers.map((h, i) => [h, row[i]])));
+    if (action === "getTrades") {
+      // Return ONLY open ENTRY legs from ActiveTrades (exclude Exit plan rows)
+      const sheet = ss.getSheetByName(ACTIVE_TRADES_SHEET);
+      const data = sheet.getDataRange().getValues();
+      const headers = data[0] || [];
+      const H = Object.fromEntries(headers.map((h,i)=>[h,i]));
+      const isClosedIndex = H["IsClosed"];
+      const legTypeIndex  = H["LegType"]; // may be missing in older data
 
-    return ContentService.createTextOutput(JSON.stringify({ trades }))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
+      const trades = data.slice(1)
+        .filter(row =>
+          String(row[isClosedIndex]).toUpperCase() === "FALSE" &&
+          (legTypeIndex === undefined || String(row[legTypeIndex]).toUpperCase() !== "EXIT")
+        )
+        .map(row => Object.fromEntries(headers.map((h, i) => [h, row[i]])));
 
-  // --- UPDATED: getQueueStatus (team-aware & ignores Exit rows) ---
-  if (action === "getQueueStatus") {
-    const {rows: rounds, headers: rH} = _getAll_("RoundsMeta");
-    const latest = rounds[rounds.length - 1];
-    const round = Number(latest[_idxMap(rH)["RoundNumber"]]);
-    const capital = _getRoundCapByRound(round);
+      return ContentService
+        .createTextOutput(JSON.stringify({ trades }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
 
-    const map = _getAll_("TeamPlayerMap");
-    const standings = _getAll_("StandingsPlayer");
-    const active = _getAll_(ACTIVE_TRADES_SHEET);
+    if (action === "getClosedTrades") {
+      const ss = SpreadsheetApp.getActiveSpreadsheet();
 
-    const mH = _idxMap(map.headers);
-    const sH = _idxMap(standings.headers);
-    const aH = _idxMap(active.headers);
+      // Build PlayerID -> {name, team} map from TeamPlayerMap
+      const {headers: mHh, rows: mRows} = _getAll_(TEAM_PLAYER_MAP_SHEET);
+      const mH = _idxMap(mHh);
+      const nameById = {};
+      const teamById = {};
+      mRows.forEach(r => {
+        const pid = String(r[mH["PlayerID"]]);
+        nameById[pid] = r[mH["PlayerName"]] || r[mH["Player"]] || "";
+        if (mH["Team"] !== undefined) teamById[pid] = r[mH["Team"]] || "";
+      });
 
-    // Teams with an open grouped trade in this round (only Entry rows count)
-    const teamsWithOpen = new Set(
-      active.rows.filter(r =>
-        Number(r[aH["RoundNumber"]]) === round &&
-        String(r[aH["IsClosed"]]).toUpperCase() !== "TRUE" &&
-        String(r[aH["LegType"]] || "").toUpperCase() !== "EXIT"
-      ).map(r => String(r[aH["Team"]]))
-    );
+      // Read CompletedTrades
+      const sheet = ss.getSheetByName("CompletedTrades");
+      if (!sheet) {
+        return ContentService
+          .createTextOutput(JSON.stringify({ trades: [] }))
+          .setMimeType(ContentService.MimeType.JSON);
+      }
+      const data = sheet.getDataRange().getValues();
+      const headers = data[0] || [];
 
-    const walletById = {};
-    standings.rows.forEach(r => walletById[String(r[sH["PlayerID"]])] = Number(r[sH["WalletBalance"]]) || 0);
+      const trades = data.slice(1).map(row => {
+        const obj = Object.fromEntries(headers.map((h, i) => [h, row[i]]));
+        const pid = String(obj.PlayerID || "");
+        // normalize name and team
+        obj.Player = obj.Player || obj.PlayerName || nameById[pid] || "";
+        if (!obj.Team) obj.Team = teamById[pid] || obj.Team || "";
+        return obj;
+      });
 
-    const queue = map.rows
-      .filter(r => !teamsWithOpen.has(String(r[mH["Team"]])))
-      .map(r => ({
-        PlayerID: String(r[mH["PlayerID"]]),
-        PlayerName: r[mH["PlayerName"]],
-        Team: r[mH["Team"]],
-        QueueNumber: Number(r[mH["PlayerOrder"]]),
-        WalletBalance: walletById[String(r[mH["PlayerID"]])] || 0
-      }))
-      .sort((a,b)=>a.QueueNumber - b.QueueNumber)
-      .slice(0,5);
+      return ContentService
+        .createTextOutput(JSON.stringify({ trades }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
 
-    return ContentService.createTextOutput(JSON.stringify({ round, capital, queue }))
-      .setMimeType(ContentService.MimeType.JSON);
   }
 
   // --- EXISTING: getPlayerInfo ---
@@ -334,7 +446,7 @@ function doGet(e){
 }
 
 /** =========================
- *  POST HANDLERS (kept + new)
+ *  POST HANDLERS
  *  ========================= */
 function doPost(e){
   const action = e.parameter.action;
@@ -396,6 +508,7 @@ function doPost(e){
   /** ---- NEW: Add another entry leg ---- */
   if (action === "addTradeLeg") {
     const tradeId = e.parameter.TradeID;
+    theQty = Number(e.parameter.Qty||0);
     const qty = Number(e.parameter.Qty||0);
     const entry = Number(e.parameter.EntryPrice||0);
     const sl = e.parameter.StopLoss || "";
@@ -660,7 +773,8 @@ function doPost(e){
     const rowIndex = Number(e.parameter.RowIndex);
     if (!rowIndex || rowIndex < 2) return _jsonBad("RowIndex invalid.");
 
-    const {sh, headers, rows} = _getAll_("ActiveTrades");
+    // FIX: use ACTIVE_TRADES_SHEET constant here
+    const {sh, headers, rows} = _getAll_(ACTIVE_TRADES_SHEET);
     const H = _idxMap(headers);
     const r = rows[rowIndex - 2];
     if (!r) return _jsonBad("Row not found.");
@@ -743,7 +857,8 @@ function doPost(e){
     if (dH["PnL"]!==undefined) row[dH["PnL"]] = totalPnL;
     if (dH["PnLPercent"]!==undefined) row[dH["PnLPercent"]] = pnlPct;
     if (dH["LegsCount"]!==undefined) row[dH["LegsCount"]] = entries.length;
-    if (dH["ExitsCount"]!==undefined) row[dH["ExitsCount"]] = exits.length; // optional column
+    if (dH["ExitsCount"]!==undefined) row[dH["ExitsCount"]] = exits.length;
+    if (dH["WalletBalanceAfterTrade"]!==undefined) row[dH["WalletBalanceAfterTrade"]] = ""; // filled below if possible
     if (dH["CompletedTimestamp"]!==undefined) row[dH["CompletedTimestamp"]] = _now();
     doneSh.appendRow(row);
 
@@ -756,7 +871,6 @@ function doPost(e){
         const qty = Number(ex.row[H["Qty"]]) || 0;
         const exitPrice  = Number(ex.row[H["ExitPrice"]]) || 0;
         const exitTotal  = qty * exitPrice;
-        // Use avgEntry for leg PnL attribution
         const pnl        = qty * (exitPrice - avgEntry) * sign;
 
         const row = headers.map(()=> "");
@@ -779,16 +893,20 @@ function doPost(e){
       });
     }
 
-    // Wallet update (add net PnL)
+    // Wallet update (add net PnL) and write WalletBalanceAfterTrade if column exists
     const {sh:standSh, headers:standH, rows:standRows} = _getAll_("StandingsPlayer");
     const sH = _idxMap(standH);
     const idx = standRows.findIndex(r => String(r[sH["PlayerID"]])===String(playerID));
     if (idx>=0) {
       const cur = Number(standRows[idx][sH["WalletBalance"]]) || 0;
-      standSh.getRange(idx+2, sH["WalletBalance"]+1).setValue(cur + totalPnL);
-      if (dH["WalletBalanceAfterTrade"] !== undefined) {
-        const lastRow = doneSh.getLastRow();
-        doneSh.getRange(lastRow, dH["WalletBalanceAfterTrade"]+1).setValue(cur + totalPnL);
+      const after = cur + totalPnL;
+      standSh.getRange(idx+2, sH["WalletBalance"]+1).setValue(after);
+
+      const {sh:doneSh2, headers:doneH2} = _getAll_("CompletedTrades");
+      const dH2 = _idxMap(doneH2);
+      if (dH2["WalletBalanceAfterTrade"] !== undefined) {
+        const lastRow = doneSh2.getLastRow();
+        doneSh2.getRange(lastRow, dH2["WalletBalanceAfterTrade"]+1).setValue(after);
       }
     }
 
@@ -809,7 +927,7 @@ function doPost(e){
     const exitPrice = parseFloat(e.parameter.ExitPrice);
 
     const ss = SpreadsheetApp.getActiveSpreadsheet();
-    const activeSheet = ss.getSheetByName("ActiveTrades");
+    const activeSheet = ss.getSheetByName(ACTIVE_TRADES_SHEET);
     const completedSheet = ss.getSheetByName("CompletedTrades");
     const standingsSheet = ss.getSheetByName("StandingsPlayer");
 
@@ -866,7 +984,7 @@ function doPost(e){
             completedSheet.appendRow(completedRow);
 
             // delete the closed row from ActiveTrades
-            SpreadsheetApp.getActiveSpreadsheet().getSheetByName("ActiveTrades").deleteRow(i+1);
+            SpreadsheetApp.getActiveSpreadsheet().getSheetByName(ACTIVE_TRADES_SHEET).deleteRow(i+1);
 
             return ContentService.createTextOutput("Trade closed and wallet updated.");
           }
@@ -889,12 +1007,25 @@ function doPost(e){
     const roundsData = roundsSheet.getDataRange().getValues();
     const headers = roundsData[0];
     const roundIndex = headers.indexOf("RoundNumber");
-    const capitalIndex = headers.indexOf("CapitalPerPlayer");
 
     const lastRoundRow = roundsData[roundsData.length - 1];
     const nextRound = parseInt(lastRoundRow[roundIndex]) + 1;
 
-    roundsSheet.appendRow([nextRound, new Date(), capital]);
+    // Store capital in whichever column your sheet uses
+    let capHeaders = _idxMap(headers);
+    const capCol =
+      (capHeaders["CapitalPerTeam"] !== undefined) ? capHeaders["CapitalPerTeam"] :
+      (capHeaders["CapitalPerPlayer"] !== undefined) ? capHeaders["CapitalPerPlayer"] :
+      null;
+
+    const row = headers.map(()=> "");
+    row[roundIndex] = nextRound;
+    // date in middle if your sheet expects [Round, Date, Capital]
+    if (headers.length >= 3) {
+      row[1] = new Date();
+      if (capCol !== null) row[capCol] = capital;
+    }
+    roundsSheet.appendRow(row);
 
     const standingsData = standingsSheet.getDataRange().getValues();
     const standingsHeaders = standingsData[0];
@@ -910,7 +1041,7 @@ function doPost(e){
   /** ---- EXISTING: generic add (legacy) + nextRound ---- */
   // (kept as-is from your earlier code)
   const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const activeSheet = ss.getSheetByName("ActiveTrades");
+  const activeSheet = ss.getSheetByName(ACTIVE_TRADES_SHEET);
   const completedSheet = ss.getSheetByName("CompletedTrades");
   const standingsSheet = ss.getSheetByName("StandingsPlayer");
 
