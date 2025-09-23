@@ -59,21 +59,34 @@ fetch(API_URL + "?action=getClosedTrades")
 function renderScripDetails(scrip) {
   const trades = allTrades.filter(t => t.Scrip === scrip);
 
-  let wins = 0, losses = 0, longWins = 0, shortWins = 0;
+  let wins = 0, losses = 0;
+  let longWins = 0, shortWins = 0;
   let longTrades = 0, shortTrades = 0;
+  let totalPnL = 0;
+  let longPnL = 0, shortPnL = 0;
+  let longEntry = 0, shortEntry = 0;
 
   trades.forEach(t => {
     const pnl = parseFloat(t.PnL) || 0;
     const type = t.PositionType;
+    const qty = parseFloat(t.Qty) || 0;
+    const entry = parseFloat(t.EntryPrice) || 0;
+    const entryValue = parseFloat(t.EntryValue) || (qty * entry);
+
+    totalPnL += pnl;
 
     if (pnl > 0) wins++;
     else if (pnl < 0) losses++;
 
     if (type === "Long") {
       longTrades++;
+      longPnL += pnl;
+      longEntry += entryValue;
       if (pnl > 0) longWins++;
     } else if (type === "Short") {
       shortTrades++;
+      shortPnL += pnl;
+      shortEntry += entryValue;
       if (pnl > 0) shortWins++;
     }
   });
@@ -82,15 +95,24 @@ function renderScripDetails(scrip) {
   const winRate = total ? ((wins / total) * 100).toFixed(2) : "0.00";
   const longWinRate = longTrades ? ((longWins / longTrades) * 100).toFixed(2) : "0.00";
   const shortWinRate = shortTrades ? ((shortWins / shortTrades) * 100).toFixed(2) : "0.00";
+  const longPnLPercent = longEntry ? ((longPnL / longEntry) * 100).toFixed(2) : "0.00";
+  const shortPnLPercent = shortEntry ? ((shortPnL / shortEntry) * 100).toFixed(2) : "0.00";
 
   totalTradesEl.textContent = total;
   winsEl.textContent = wins;
   lossesEl.textContent = losses;
   winRateEl.textContent = winRate;
-  longTradesEl.textContent = longTrades;
-  shortTradesEl.textContent = shortTrades;
-  longWinRateEl.textContent = longWinRate;
-  shortWinRateEl.textContent = shortWinRate;
+  longTradesEl.innerHTML = `${longTrades} <span class="labelspan">w%</span><span style="color:lightgreen;">${longWinRate}</span> <span class="labelspan"> PnL<span style="color:skyblue;">${longPnLPercent}</span>`;
+  shortTradesEl.innerHTML = `${shortTrades}<span class="labelspan">w%</span><span style="color:orange;">${shortWinRate}</span> <span class="labelspan"> PnL<span style="color:skyblue;">${shortPnLPercent}</span>`;
+
+  // Show total PnL somewhere (e.g., below win% row)
+  let pnlSummary = document.getElementById("scripPnLSummary");
+  if (!pnlSummary) {
+    pnlSummary = document.createElement("div");
+    pnlSummary.id = "scripPnLSummary";
+    document.querySelector(".card-grid")?.appendChild(pnlSummary);
+  }
+  pnlSummary.innerHTML = `<div class="card">PnL<span>${totalPnL.toFixed(2)}</span></div><br>`;
 
   // Fill table
   tableBody.innerHTML = "";
@@ -105,8 +127,8 @@ function renderScripDetails(scrip) {
 
     const row = document.createElement("tr");
     row.innerHTML = `
-    <td>${pnlPercent.toFixed(2)}</td>
-    <td style="color: ${pnl > 0 ? 'lightgreen' : pnl < 0 ? 'salmon' : 'white'};">${pnl.toFixed(2)}</td>
+      <td>${pnlPercent.toFixed(2)}%</td>
+      <td style="color: ${pnl > 0 ? 'lightgreen' : pnl < 0 ? 'salmon' : 'white'};">${pnl.toFixed(2)}</td>
       <td>${t.RoundNumber}</td>
       <td>${t.Player}</td>
       <td>${t.Team}</td>

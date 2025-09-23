@@ -16,7 +16,13 @@ async function load(){
   c.innerHTML = "Loading...";
   try {
     const res = await fetch(`${API_URL}?action=getActiveGroupedTrades`);
-    const j = await res.json();
+    // Be defensive in case the web app returns text (e.g., "Invalid request")
+    const text = await res.text();
+    let j;
+    try { j = JSON.parse(text); } catch (e) {
+      throw new Error(`Non-JSON response from server: ${text.slice(0,120)}…`);
+    }
+
     const positions = j.positions || [];
     c.innerHTML = "";
     positions.forEach(p => c.appendChild(renderCard(p)));
@@ -51,7 +57,7 @@ function renderCard(p){
   /* ==================== ENTRIES ==================== */
   const entries = document.createElement("div");
   entries.innerHTML = `
-    <div style="font-weight:700;margin-top:.2rem;">Entries</div>
+    <div>Entries</div>
     <div class="table-wrapper">
       <table>
         <thead><tr>
@@ -89,7 +95,7 @@ function renderCard(p){
             <div><label>Qty<br><input type="number" step="any" class="iq" value="${vQty}" style="width:8rem;"></label></div>
             <div><label>Entry<br><input type="number" step="any" class="ie" value="${vEntry}" style="width:8rem;"></label></div>
             <div style="align-self:flex-end;opacity:.85;">Est. Total: <strong class="est-entry-row">0</strong></div>
-            <div style="margin-left:auto;display:flex;gap:.5rem;">
+            <div>
               <button class="save-entry">Save</button>
               <button class="cancel-entry" style="background:#374151;">Cancel</button>
             </div>
@@ -129,7 +135,7 @@ function renderCard(p){
       <div><label>Entry<br><input type="number" step="any" class="ae" style="width:8rem;"></label></div>
       <div style="align-self:flex-end;opacity:.85;">Est. Total: <strong class="est-entry-total">0</strong></div>
       <button class="add">Add Leg</button>
-      <div style="margin-left:auto;opacity:.8;">Remaining Capital: <strong>${raw(p.RemainingCapital)}</strong></div>
+      <div>Remaining Capital: <strong>${raw(p.RemainingCapital)}</strong></div>
     `;
     card.appendChild(add);
 
@@ -176,7 +182,7 @@ function renderCard(p){
         </tr></thead>
         <tbody>
           ${exits.map((e)=> e.IsExecuted
-            ? renderExitTextRowHTML(e)     // infer via totals
+            ? renderExitTextRowHTML(e)
             : renderExitEditableRowHTML(e)
           ).join("")}
         </tbody>
@@ -188,7 +194,7 @@ function renderCard(p){
   bindExitEditableHandlers(exitsWrap, card, p);
   bindExitExecutedHandlers(exitsWrap, card, p);
 
-  // Add exit plan (Qty defaults to remaining qty = total entries - planned exits)
+  // Add exit plan
   const totalQty = Number(p.TotalQty||0);
   const plannedExitQty = exits.reduce((a,e)=>a + Number(e.Qty||0), 0);
   const remainingQty = Math.max(0, totalQty - plannedExitQty);
@@ -296,7 +302,6 @@ function renderExitEditableRowHTML(e){
   `;
 }
 
-/* Text row now uses ExecMode if provided OR infers via totals with tolerance */
 function renderExitTextRowHTML(e){
   const q  = Number(e.Qty||0);
   const px = (e.ExitPrice===""||e.ExitPrice==null) ? undefined : Number(e.ExitPrice);
@@ -329,7 +334,6 @@ function renderExitTextRowHTML(e){
 }
 
 function bindExitEditableHandlers(exitsWrap, card, p){
-  // Update plan
   $$("button.upd-exit", exitsWrap).forEach(btn=>{
     btn.addEventListener("click", async ()=>{
       const tr = btn.closest("tr");
@@ -348,7 +352,6 @@ function bindExitEditableHandlers(exitsWrap, card, p){
     });
   });
 
-  // Execute @ Target
   $$("button.exec-exit", exitsWrap).forEach(btn=>{
     btn.addEventListener("click", async ()=>{
       const tr = btn.closest("tr");
@@ -375,13 +378,12 @@ function bindExitEditableHandlers(exitsWrap, card, p){
     });
   });
 
-  // Execute @ SL (keep Exit Price as-is)
   $$("button.exec-sl", exitsWrap).forEach(btn=>{
     btn.addEventListener("click", async ()=>{
       const tr = btn.closest("tr");
       const RowIndex = Number(tr.getAttribute("data-row"));
       const qtyVal = $(".xq", tr).value;
-      const priceValBefore = $(".xp", tr).value;           // keep planned exit price
+      const priceValBefore = $(".xp", tr).value;
       const slVal = $(".xs", tr).value;
       if (slVal === "" || Number(slVal) <= 0) {
         return alert("Please enter a valid SL to execute @ SL.");
@@ -402,7 +404,6 @@ function bindExitEditableHandlers(exitsWrap, card, p){
     });
   });
 
-  // Delete plan
   $$("button.del-exit", exitsWrap).forEach(btn=>{
     btn.addEventListener("click", async ()=>{
       if (!confirm("Delete this exit plan?")) return;
@@ -447,7 +448,6 @@ function bindExitExecutedHandlers(exitsWrap, card, p){
   });
 }
 
-/* single-row bind helpers */
 function bindExitExecutedHandlersOnRow(tr, card, p){
   $(".edit-executed", tr).addEventListener("click", ()=>{
     const RowIndex = Number(tr.getAttribute("data-row"));
@@ -510,7 +510,7 @@ function bindExitEditableHandlersOnRow(tr, card, p){
   $(".exec-sl", tr).addEventListener("click", async ()=>{
     const RowIndex = Number(tr.getAttribute("data-row"));
     const qtyVal = $(".xq", tr).value;
-    const priceValBefore = $(".xp", tr).value;  // keep planned exit price as-is
+    const priceValBefore = $(".xp", tr).value;
     const slVal = $(".xs", tr).value;
     if (slVal === "" || Number(slVal) <= 0) {
       return alert("Please enter a valid SL to execute @ SL.");
@@ -611,18 +611,29 @@ function updateTotalsFromDOM(card, p, closeBtnOpt){
   pnlSlSpan.textContent = `${fmt2(pctSL)}% (${fmt2(pnlSL)})`;
   pnlSlSpan.style.color = toneColor(pnlSL);
 
-  const allExitsHavePrice = exitRows.every(tr=>{
-    const qInput = $(".xq", tr);
-    const q = qInput ? Number(qInput.value||0) : Number(($(".tq", tr)?.textContent || "0").trim());
+  // Each exit row must be "executable": has Target OR SL OR already executed (has total)
+  const allExitsExecutable = exitRows.every(tr=>{
+    const q = $(".xq", tr)
+      ? Number($(".xq", tr).value || 0)
+      : Number(($(".tq", tr)?.textContent || "0").trim());
     if (!q) return true;
-    const pInput = $(".xp", tr);
-    if (pInput) return (pInput.value!=="" && Number(pInput.value)>0);
-    const tp = $(".tp", tr)?.textContent?.trim();
-    return (tp && tp!=="—" && Number(tp)>0);
+
+    const hasTarget = $(".xp", tr)
+      ? ($(".xp", tr).value !== "" && Number($(".xp", tr).value) > 0)
+      : (() => { const tp = $(".tp", tr)?.textContent?.trim(); return (tp && tp !== "—" && Number(tp) > 0); })();
+
+    const hasSL = $(".xs", tr)
+      ? ($(".xs", tr).value !== "" && Number($(".xs", tr).value) > 0)
+      : (() => { const ts = $(".ts", tr)?.textContent?.trim(); return (ts && ts !== "—" && Number(ts) > 0); })();
+
+    const tt = $(".tt", tr)?.textContent?.trim();
+    const hasExecutedTotal = !!tt && tt !== "—" && !isNaN(Number(tt)) && Number(tt) > 0;
+
+    return hasTarget || hasSL || hasExecutedTotal;
   });
 
   const closeBtn = closeBtnOpt || $$("button", card).find(b => b.textContent==="Close Trade");
-  if (closeBtn) closeBtn.disabled = !(totalQty>0 && exitQtyTotal===totalQty && allExitsHavePrice);
+  if (closeBtn) closeBtn.disabled = !(totalQty>0 && exitQtyTotal===totalQty && allExitsExecutable);
 }
 
 /* DOM utils */

@@ -21,6 +21,21 @@ function updateEstimatedTotal() {
 qtyInput.addEventListener("input", updateEstimatedTotal);
 entryPriceInput.addEventListener("input", updateEstimatedTotal);
 
+const scripDatalist = document.getElementById("scripList");
+fetch(`${SCRIPT_URL}?action=getScripList`)
+  .then(r => r.json())
+  .then(({ scrips }) => {
+    if (!Array.isArray(scrips)) return;
+    scripDatalist.innerHTML = "";
+    scrips.forEach(name => {
+      const opt = document.createElement("option");
+      opt.value = name;
+      scripDatalist.appendChild(opt);
+    });
+  })
+  .catch(err => console.error("getScripList failed:", err));
+
+
 // Load queue + cap
 fetch(`${SCRIPT_URL}?action=getQueueStatus`)
   .then(r => r.json())
@@ -34,10 +49,14 @@ fetch(`${SCRIPT_URL}?action=getQueueStatus`)
       wrap.className = "radio-wrapper";
       wrap.innerHTML = `
         <input type="radio" name="Player" value="${p.PlayerID}">
-        <span class="radio-button">${p.QueueNumber}. ${p.PlayerName} (${p.Team})</span>
+        <span class="radio-button">
+          ${p.QueueNumber}. ${p.PlayerName} (${p.Team})
+          ${p.RiskLevel ? `<small class="risk-badge">(${p.RiskLevel})</small>` : ""}
+        </span>
       `;
       playerList.appendChild(wrap);
     });
+    
 
     document.querySelectorAll("input[name='Player']").forEach(radio => {
       radio.addEventListener("change", e => {
