@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>ATrL – Team</title>
+  <link rel="stylesheet" href="./assets/css/style.css?v=11">
+</head>
+<body class="app app-team">
+
+  <header class="app-header">
+    <div class="league-chips" id="league-chips"></div>
+    <div class="team-hero">
+      <div class="team-rank" id="team-rank">#—</div>
+      <div class="team-title" id="team-title">Team</div>
+    </div>
+  </header>
+
+  <main class="main">
+    <!-- Overview -->
+    <section class="card">
+      <div class="card-header"><h2 class="card-title">Overview</h2></div>
+      <div class="card-body">
+        <div class="stats-grid" id="overall-stats"></div>
+        <div class="stats-row" id="rr-stats"></div>
+      </div>
+    </section>
+
+    <!-- By League -->
+    <section class="card">
+      <div class="card-header"><h2 class="card-title">By League</h2></div>
+      <div class="card-body" id="league-stats"></div>
+    </section>
+
+    <!-- Roster -->
+    <section class="card">
+      <div class="card-header"><h2 class="card-title">Roster</h2></div>
+      <div class="card-body" id="roster-list"></div>
+    </section>
+
+    <!-- Best Scrips -->
+    <section class="card">
+      <div class="card-header"><h2 class="card-title">Best Scrips</h2></div>
+      <div class="card-body" id="best-scrips"></div>
+    </section>
+
+    <!-- Recent Trades -->
+    <section class="card">
+      <div class="card-header"><h2 class="card-title">Recent Trades</h2></div>
+      <div class="card-body" id="trade-cards"></div>
+    </section>
+  </main>
+
+  <nav class="bottom-nav">
+    <a href="index.html" class="nav-item" aria-label="Home">🏠</a>
+    <a href="standings.html" class="nav-item" aria-label="Standings">📊</a>
+    <a href="scrips.html" class="nav-item" aria-label="Scrips">🧾</a>
+    <a href="wallet.html" class="nav-item" aria-label="Wallet">💼</a>
+    <a href="add.html" class="nav-item" aria-label="Add">➕</a>
+  </nav>
+
+  <script src="./assets/js/api.js?v=11"></script>
+  <script src="./assets/js/format.js?v=11"></script>
+  <script src="./assets/js/state.js?v=11"></script>
+  <script src="./assets/js/team.js?v=11"></script>
+</body>
+</html>

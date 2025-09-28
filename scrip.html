@@ -1,66 +1,64 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Scrip Details</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>ATrL – Scrip</title>
+  <link rel="stylesheet" href="./assets/css/style.css?v=7">
 </head>
-<body>
-  <h2>Scrip Details</h2>
+<body class="app app-scrip-single">
 
-  <!-- 🔘 Scrip Selection -->
-  <div id="scripRadioContainer" class="radio-scroll-row">
-    <!-- Populated dynamically -->
-  </div>
+  <header class="app-header">
+    <!-- Search -->
+    <div class="scrips-toolbar">
+      <input id="scrip-search" class="input" type="search" placeholder="Search scrip…" list="scrips-datalist" autocomplete="off">
+      <datalist id="scrips-datalist"></datalist>
+    </div>
 
-  <!-- 📊 Summary Stats -->
-  <h3>📊 Scrip Summary</h3>
-  <div class="card-grid">
-    <div class="card">Trades <span id="totalTrades"></span></div>
-    <div class="card">Wins <span id="wins"></span></div>
-    <div class="card">Losses <span id="losses"></span></div>
-    <div class="card">Win %: <span id="winRate"></span>%</div>
-  </div>
+    <!-- Top chips -->
+    <div class="chip-row" id="scrip-chips"></div>
 
-  <!-- 📈 Type Stats -->
-  <h3>📈 Trade Type Stats</h3>
-  <div class="card-grid">
-    <div class="card multiline">Long<span id="longTrades"></span><span class="spanlabel"></span><span id="longWinRate"></span></div>
-    <div class="card multiline">Short<span id="shortTrades"></span><span class="spanlabel"></span><span id="shortWinRate"></span></div>
-  </div>
+    <!-- Title -->
+    <div class="scrip-title" id="scrip-title">Scrip</div>
+  </header>
 
-  <!-- 📜 Trade History Table -->
-  <h3>📜 Trade History</h3>
-  <div class="table-wrapper">
-    <table id="scripTradeTable">
-      <thead>
-        <tr>
-            <th>PnL%</th>
-            <th>PnL</th>
-          <th>Round</th>
-          <th>Player</th>
-          <th>Team</th>
-          <th>Position</th>
-          <th>Qty</th>
-          <th>Entry</th>
-          <th>Exit</th>
-          <th>Wallet</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
+  <main class="main">
+    <!-- Totals -->
+    <section class="card">
+      <div class="card-header"><h2 class="card-title">Overview</h2></div>
+      <div class="card-body">
+        <div class="stats-grid" id="totals-stats">
+          <!-- TT, W, L, W%, PnL, PnL% -->
+        </div>
+      </div>
+    </section>
 
-<div class="navbar">
-    <a href="index.html">🏠</a>
-    <a href="standings.html">📊</a>
-    <a href="team-single.html">👥</a>
-    <a href="scrip.html">₿</a>
-    <a href="overall.html">🎯</a>
-    <a href="add.html" class="plus-button">➕</a>
-</div>
+    <!-- Trade-type stats -->
+    <section class="card">
+      <div class="card-header"><h2 class="card-title">Trade Type</h2></div>
+      <div class="card-body" id="side-stats">
+        <!-- Long/Short blocks -->
+      </div>
+    </section>
 
-  <script src="scrip.js"></script>
+    <!-- History as cards -->
+    <section class="card">
+      <div class="card-header"><h2 class="card-title">Trade History</h2></div>
+      <div class="card-body" id="history"></div>
+    </section>
+  </main>
+
+  <nav class="bottom-nav">
+    <a href="index.html" class="nav-item" aria-label="Home">🏠</a>
+    <a href="standings.html" class="nav-item" aria-label="Standings">📊</a>
+    <a href="scrips.html" class="nav-item" aria-label="Scrips">🧾</a>
+    <a href="wallet.html" class="nav-item" aria-label="Wallet">💼</a>
+    <a href="add.html" class="nav-item" aria-label="Add">➕</a>
+  </nav>
+
+  <script src="./assets/js/api.js?v=7"></script>
+  <script src="./assets/js/format.js?v=7"></script>
+  <script src="./assets/js/state.js?v=7"></script>
+  <script src="./assets/js/scrip-single.js?v=7"></script>
 </body>
 </html>

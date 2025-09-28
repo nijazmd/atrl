@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>ATrL – Player</title>
+  <link rel="stylesheet" href="./assets/css/style.css?v=10">
+</head>
+<body class="app app-player">
+
+  <header class="app-header">
+    <div class="league-chips" id="league-chips"></div>
+    <div class="player-hero">
+      <div class="player-rank" id="player-rank">#—</div>
+      <div class="player-title" id="player-title">Player · Team</div>
+      <div class="player-meta" id="player-meta">Risk: —</div>
+    </div>
+  </header>
+
+  <main class="main">
+    <!-- Overall stats -->
+    <section class="card">
+      <div class="card-header"><h2 class="card-title">Overview</h2></div>
+      <div class="card-body">
+        <div class="stats-grid" id="overall-stats"></div>
+        <div class="stats-row" id="rr-stats"></div>
+      </div>
+    </section>
+
+    <!-- Per-league -->
+    <section class="card">
+      <div class="card-header"><h2 class="card-title">By League</h2></div>
+      <div class="card-body" id="league-stats"></div>
+    </section>
+
+    <!-- Best scrips -->
+    <section class="card">
+      <div class="card-header"><h2 class="card-title">Best Scrips</h2></div>
+      <div class="card-body" id="best-scrips"></div>
+    </section>
+
+    <!-- Recent trades -->
+    <section class="card">
+      <div class="card-header"><h2 class="card-title">Recent Trades</h2></div>
+      <div class="card-body" id="trade-cards"></div>
+    </section>
+  </main>
+
+  <nav class="bottom-nav">
+    <a href="index.html" class="nav-item" aria-label="Home">🏠</a>
+    <a href="standings.html" class="nav-item" aria-label="Standings">📊</a>
+    <a href="scrips.html" class="nav-item" aria-label="Scrips">🧾</a>
+    <a href="wallet.html" class="nav-item" aria-label="Wallet">💼</a>
+    <a href="add.html" class="nav-item" aria-label="Add">➕</a>
+  </nav>
+
+  <script src="./assets/js/api.js?v=10"></script>
+  <script src="./assets/js/format.js?v=10"></script>
+  <script src="./assets/js/state.js?v=10"></script>
+  <script src="./assets/js/player.js?v=10"></script>
+</body>
+</html>

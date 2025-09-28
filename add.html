@@ -1,101 +1,125 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-  <title>ATrL Trade Entry</title>
-  <link rel="stylesheet" href="style.css">
-  <meta name="viewport" content="width=device-width, user-scalable=no">
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>ATrL – Add Trade</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <script>window.APP_SCRIPT_ENDPOINT = "YOUR_APPS_SCRIPT_EXEC_URL";</script>
 </head>
-<body>
-  <h2>Add New Trade</h2>
-  <form id="tradeForm" class="form-grid">
-  <div class="form-group full-width">
-    <label>Round
-      <input type="number" name="RoundNumber" id="roundNumber" readonly>
-    </label>
-  <a href="next-round.html" class="nxroundBtn">Add Round</a>
+<body class="app app-add">
 
-  </div>
+  <!-- Header with league chips -->
+  <header class="app-header">
+    <div class="league-chips" id="league-chips"></div>
+    <div class="round-banner" id="round-banner"><!-- Round #: X • Budget: Y --></div>
+    <div class="chip-row" id="tag-filter"></div>
 
-  <div class="form-group full-width" id="playerList">
-    <strong>Player</strong>
-    <!-- Player radio buttons will go here -->
-  </div>
+  </header>
 
-  <div class="form-group full-width" id="playerInfo" style="display:none;">
-    <p><strong>Queue</strong> <span id="queueNumberDisplay"></span></p>
-    <p><strong>Wallet</strong> ₹<span id="walletDisplay"></span></p>
-  </div>
+  <!-- Main form -->
+  <main class="main">
+    <section class="card">
+      <div class="card-header">
+        <h1 class="card-title">➕ Add New Position</h1>
+      </div>
 
-  <div class="form-group full-width">
-    <strong>Position Type</strong>
-    <div class="radio-group">
-      <label class="radio-wrapper">
-        <input type="radio" name="PositionType" value="Long" checked>
-        <span class="radio-button">Long 📈</span>
-      </label>
-      <label class="radio-wrapper">
-        <input type="radio" name="PositionType" value="Short">
-        <span class="radio-button">Short 📉</span>
-      </label>
-    </div>
-  </div>
+      <div class="card-body">
+        <!-- Player select (Next 5) -->
+        <div class="input-row">
+          <label class="label">Player</label>
+          <div class="chip-group" id="player-chips"><!-- chips injected: Name (risk) --></div>
+        </div>
 
-  <div class="form-group">
-    <label>Scrip
-      <input type="text" name="Scrip" list="scripOptions" required>
-      <datalist id="scripOptions"></datalist>
-    </label>
-  </div>
+        <div class="grid-2">
+          <div class="input-row">
+            <label class="label">Side</label>
+            <div class="chip-group" id="side-chips">
+              <button type="button" class="chip" data-side="Long">Long</button>
+              <button type="button" class="chip" data-side="Short">Short</button>
+            </div>
+            <!-- Tags (multi-select) -->
+            <div class="chip-row" id="tags-chips"></div>
+          </div>
+          <div class="input-row">
+            <label class="label">Scrip</label>
+            <input class="input js-autofocus" id="scrip-input" list="scrip-list" type="text" placeholder="Type to search…" autocomplete="off">
+            <datalist id="scrip-list"></datalist>
+          </div>
+        </div>
 
-  
-  <div class="form-group">
-    <label>Qty
-      <input type="number" name="Qty" id="qtyInput" required step="any" inputmode="decimal">
-    </label>
-  </div>
-  
-  <div class="form-group">
-    <label>Entry Price
-      <input type="number" name="EntryPrice" id="entryPriceInput" required step="any" inputmode="decimal">
-    </label>
-  </div>
-  
-  <!-- <div class="form-group">
-    <label>Stop Loss
-      <input type="number" name="StopLoss" step="any" inputmode="decimal">
-    </label>
-  </div> -->
-  <div class="form-group full-width">
-    <p><strong>Estimated Trade Total:</strong> ₹<span id="estimatedTotal">0</span></p>
-  </div>
+        <div class="grid-3">
+          <div class="input-row">
+            <label class="label">SL</label>
+            <div class="input-stepper">
+              <button type="button" data-step="-1">−</button>
+              <input id="sl" type="text" inputmode="decimal" step="any" placeholder="0.00">
+              <button type="button" data-step="+1">+</button>
+            </div>
+          </div>
+          <div class="input-row">
+            <label class="label">TP (opt)</label>
+            <div class="input-stepper">
+              <button type="button" data-step="-1">−</button>
+              <input id="tp" type="text" inputmode="decimal" step="any" placeholder="0.00">
+              <button type="button" data-step="+1">+</button>
+            </div>
+          </div>
+          <div class="input-row">
+            <label class="label">Entry</label>
+            <div class="input-stepper">
+              <button type="button" data-step="-1">−</button>
+              <input id="entry" type="text" inputmode="decimal" step="any" placeholder="0.00">
+              <button type="button" data-step="+1">+</button>
+            </div>
+          </div>
+        </div>
 
-  <input type="hidden" name="EntryValue" id="entryValueHidden">
-  <input type="hidden" name="CapitalUsed" id="capitalUsedHidden">
-  <input type="hidden" name="PnLPercent" id="pnlPercentHidden">
+        <div class="grid-3">
+          <div class="input-row">
+            <label class="label">Qty</label>
+            <div class="input-stepper">
+              <button type="button" data-step="-1">−</button>
+              <input id="qty" type="text" inputmode="decimal" step="any" placeholder="0">
+              <button type="button" data-step="+1">+</button>
+            </div>
+          </div>
+          <div class="input-row">
+            <label class="label">Total</label>
+            <div class="input-stepper">
+              <button type="button" data-step="-1">−</button>
+              <input id="total" type="text" inputmode="decimal" step="any" placeholder="0.00">
+              <button type="button" data-step="+1">+</button>
+            </div>
+          </div>
+          <div class="input-row">
+            <label class="label">R:R</label>
+            <div class="stat"><span class="stat-value" id="rr-view">—</span></div>
+          </div>
+        </div>
 
-  <div class="form-group full-width">
-    <button type="submit">Submit</button>
-  </div>
-</form>
+        <div class="action-row">
+          <button id="submit-btn" class="btn-primary">Create</button>
+        </div>
+      </div>
+    </section>
+  </main>
 
-  
-  <p id="submitStatus"></p>
+  <!-- Bottom emoji nav -->
+  <nav class="bottom-nav">
+    <a href="index.html" class="nav-item" aria-label="Home">🏠</a>
+    <a href="standings.html" class="nav-item" aria-label="Standings">📊</a>
+    <a href="scrips.html" class="nav-item" aria-label="Scrips">🧾</a>
+    <a href="wallet.html" class="nav-item" aria-label="Wallet">💼</a>
+    <a href="add.html" class="nav-item nav-item--active" aria-label="Add">➕</a>
+  </nav>
 
-
-<div class="navbar">
-    <a href="index.html">🏠</a>
-    <a href="standings.html">📊</a>
-    <a href="team-single.html">👥</a>
-    <a href="scrip.html">₿</a>
-    <a href="overall.html">🎯</a>
-    <a href="add.html" class="plus-button">➕</a>
-</div>
-  
-  
-  <!-- Include Google Material Icons -->
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  
-
-  <script src="add.js"></script>
+  <script src="assets/js/api.js?v=4"></script>
+  <script src="assets/js/schema.js?v=4"></script>
+  <script src="assets/js/compute.js?v=4"></script>
+  <script src="assets/js/ui.js?v=4"></script>
+  <script src="assets/js/format.js?v=4"></script>
+  <script src="assets/js/state.js?v=4"></script>
+  <script src="assets/js/add.js?v=4"></script>
 </body>
 </html>

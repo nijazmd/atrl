@@ -1,29 +1,39 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Active Trades - Home</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-  <link rel="stylesheet" href="style.css">
-  <!-- Google Material Icons (kept for other pages/features if needed) -->
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-</head>
-<body>
-  <h2>Active Trades</h2>
+<body class="app app-home">
+  <header class="app-header">
+    <div class="league-chips" id="league-chips"></div>
+    <div class="round-banner" id="round-banner"></div>
+  </header>
 
-  <!-- was inline-styled; now uses utility classes -->
-  <div id="activeTrades" class="stack gap-md"></div>
+  <main class="main">
+    <!-- Open Positions -->
+    <section class="card">
+      <div class="card-header"><h2 class="card-title">Open Positions</h2></div>
+      <div class="card-body" id="open-list"></div>
+    </section>
 
-  <div class="navbar">
-    <a href="index.html">🏠</a>
-    <a href="standings.html">📊</a>
-    <a href="team-single.html">👥</a>
-    <a href="scrip.html">₿</a>
-    <a href="overall.html">🎯</a>
-    <a href="add.html" class="plus-button">➕</a>
-  </div>
+    <!-- Master wallet snapshot(s) -->
+    <section class="card">
+      <div class="card-header"><h2 class="card-title">Master Wallet</h2></div>
+      <div class="card-body" id="wallet-cards"></div>
+    </section>
 
-  <div class="version">0.4.2 250901</div>
+    <!-- Last 5 trades -->
+    <section class="card">
+      <div class="card-header"><h2 class="card-title">Last 5 Trades</h2></div>
+      <div class="card-body" id="last-trades"></div>
+    </section>
+  </main>
 
-  <script src="active_trades.js"></script>
+  <nav class="bottom-nav">
+    <a href="index.html" class="nav-item nav-item--active" aria-label="Home">🏠</a>
+    <a href="standings.html" class="nav-item" aria-label="Standings">📊</a>
+    <a href="scrips.html" class="nav-item" aria-label="Scrips">🧾</a>
+    <a href="wallet.html" class="nav-item" aria-label="Wallet">💼</a>
+    <a href="add.html" class="nav-item" aria-label="Add">➕</a>
+  </nav>
+
+  <script src="./assets/js/api.js?v=9"></script>
+  <script src="./assets/js/format.js?v=9"></script>
+  <script src="./assets/js/state.js?v=9"></script>
+  <script src="./assets/js/home.js?v=9"></script>
 </body>
-</html>

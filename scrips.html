@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>ATrL – Scrips</title>
+  <link rel="stylesheet" href="./assets/css/style.css?v=6">
+</head>
+<body class="app app-scrips">
+
+  <header class="app-header">
+    <div class="league-chips" id="league-chips"></div>
+
+    <div class="scrips-toolbar">
+      <input id="scrip-search" class="input" type="search" placeholder="Search scrip…" autocomplete="off">
+    </div>
+  </header>
+
+  <main class="main">
+    <section class="card">
+      <div class="card-header">
+        <h2 class="card-title">All Scrips</h2>
+      </div>
+      <div class="card-body">
+        <table class="table" id="scrips-table">
+          <thead>
+            <tr>
+              <th>R</th>
+              <th>Scrip</th>
+              <th>TT</th>
+              <th>W%</th>
+              <th>LW%</th>
+              <th>SW%</th>
+              <th id="th-pnl" class="sortable">PnL</th>
+              <th id="th-pnlpct" class="sortable">PnL%</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <div id="scrips-empty" class="empty" style="display:none;">No scrips match your filter.</div>
+      </div>
+    </section>
+  </main>
+
+  <nav class="bottom-nav">
+    <a href="index.html" class="nav-item" aria-label="Home">🏠</a>
+    <a href="standings.html" class="nav-item" aria-label="Standings">📊</a>
+    <a href="scrips.html" class="nav-item nav-item--active" aria-label="Scrips">🧾</a>
+    <a href="wallet.html" class="nav-item" aria-label="Wallet">💼</a>
+    <a href="add.html" class="nav-item" aria-label="Add">➕</a>
+  </nav>
+
+  <script src="./assets/js/api.js?v=6"></script>
+  <script src="./assets/js/format.js?v=6"></script>
+  <script src="./assets/js/state.js?v=6"></script>
+  <script src="./assets/js/scrips.js?v=6"></script>
+</body>
+</html>

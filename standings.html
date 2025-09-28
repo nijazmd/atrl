@@ -1,62 +1,65 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Player Standings</title>
-    <link rel="stylesheet" href="style.css">
-    <meta name="viewport" content="width=device-width, user-scalable=no">
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>ATrL – Standings</title>
+  <link rel="stylesheet" href="assets/css/style.css">
 </head>
-<body>
-    <h2>Player Standings</h2>
-    
-    <table id="standingsTable">
-        <thead>
+<body class="app app-standings">
+
+  <header class="app-header">
+    <div class="league-chips" id="league-chips"></div>
+    <div class="chip-row" id="scope-chips"></div>
+    <div class="mode-chips" id="mode-chips">
+      <!-- Master vs League scope -->
+      <button type="button" class="chip chip--selected" data-scope="league">League</button>
+      <button type="button" class="chip" data-scope="master">Master</button>
+    </div>
+  </header>
+
+  <main class="main">
+    <section class="card">
+      <div class="card-header"><h2 class="card-title">Teams</h2></div>
+      <div class="card-body">
+        <table class="table" id="teams-table">
+          <thead>
             <tr>
-                <th>R</th>
-                <th>P</th>
-                <th>T</th>
-                <th>Win%</th>
-                <th>PnL</th>
+              <th>R</th><th>Team</th><th>TT</th><th>W%</th><th>PnL</th><th>PnL%</th>
             </tr>
-        </thead>
-        <tbody>
-            <!-- Data will be filled dynamically by JavaScript -->
-        </tbody>
-    </table>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
 
-    <h2>Team Standings</h2>
-<table id="teamStandingsTable">
-  <thead>
-    <tr>
-      <th>R</th>
-      <th>T</th>
-      <th>PnL</th>
-      <th>Trades</th>
-      <th>W</th>
-      <th>L</th>
-    </tr>
-  </thead>
-  <tbody>
-    <!-- Filled dynamically -->
-  </tbody>
-</table>
+    <section class="card">
+      <div class="card-header"><h2 class="card-title">Players</h2></div>
+      <div class="card-body">
+        <table class="table" id="players-table">
+          <thead>
+            <tr>
+              <th>R</th><th>P</th><th>T</th><th>TT</th><th>W%</th><th>PnL</th><th>PnL%</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
 
-<div class="navbar">
-    <a href="index.html">🏠</a>
-    <a href="standings.html">📊</a>
-    <a href="team-single.html">👥</a>
-    <a href="scrip.html">₿</a>
-    <a href="overall.html">🎯</a>
-    <a href="add.html" class="plus-button">➕</a>
-</div>
+  <!-- Bottom emoji nav -->
+  <nav class="bottom-nav">
+    <a href="index.html" class="nav-item" aria-label="Home">🏠</a>
+    <a href="standings.html" class="nav-item nav-item--active" aria-label="Standings">📊</a>
+    <a href="scrips.html" class="nav-item" aria-label="Scrips">🧾</a>
+    <a href="wallet.html" class="nav-item" aria-label="Wallet">💼</a>
+    <a href="add.html" class="nav-item" aria-label="Add">➕</a>
+  </nav>
 
-
-<!-- Include Google Material Icons -->
-<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-
-
-
-    <script src="standings.js"></script>
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/format.js"></script>
+  <script src="assets/js/state.js"></script>
+  <script src="assets/js/standings.js"></script>
 </body>
 </html>

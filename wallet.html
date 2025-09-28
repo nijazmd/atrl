@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>ATrL – Wallet</title>
+  <link rel="stylesheet" href="./assets/css/style.css?v=8">
+</head>
+<body class="app app-wallet">
+
+  <header class="app-header">
+    <div class="league-chips" id="league-chips"></div>
+  </header>
+
+  <main class="main">
+    <!-- Wallet cards -->
+    <section id="wallet-cards"></section>
+
+    <!-- Players balances -->
+    <section class="card">
+      <div class="card-header"><h2 class="card-title">Players</h2></div>
+      <div class="card-body" id="players-list"></div>
+    </section>
+
+    <!-- Add wallet txn (small admin control) -->
+    <section class="card">
+      <div class="card-header"><h2 class="card-title">New Wallet Txn</h2></div>
+      <div class="card-body">
+        <form id="txn-form" class="form">
+          <div class="row">
+            <label class="lbl">Wallet</label>
+            <select id="txn-wallet" class="input"></select>
+          </div>
+          <div class="row">
+            <label class="lbl">Type</label>
+            <select id="txn-type" class="input">
+              <option value="Add">Add (➕)</option>
+              <option value="Adjust">Adjust (🔧)</option>
+              <option value="Withdraw">Withdraw (➖)</option>
+            </select>
+          </div>
+          <div class="row">
+            <label class="lbl">Amount</label>
+            <div class="number-group">
+              <button type="button" class="btn-step" data-step-for="txn-amount" data-dir="down">−</button>
+              <input id="txn-amount" class="input" type="number" inputmode="decimal" placeholder="0">
+              <button type="button" class="btn-step" data-step-for="txn-amount" data-dir="up">+</button>
+            </div>
+          </div>
+          <div class="row">
+            <label class="lbl">Player (opt)</label>
+            <select id="txn-player" class="input">
+              <option value="">— none —</option>
+            </select>
+          </div>
+          <div class="row">
+            <label class="lbl">Tag</label>
+            <input id="txn-tag" class="input" placeholder="e.g. deposit / fees">
+          </div>
+          <div class="row">
+            <label class="lbl">Note</label>
+            <input id="txn-note" class="input" placeholder="note (optional)">
+          </div>
+          <div class="row">
+            <button class="btn btn-primary" type="submit">Save</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- Recent txns -->
+    <section class="card">
+      <div class="card-header"><h2 class="card-title">Recent</h2></div>
+      <div class="card-body" id="recent-txns"></div>
+    </section>
+  </main>
+
+  <nav class="bottom-nav">
+    <a href="index.html" class="nav-item" aria-label="Home">🏠</a>
+    <a href="standings.html" class="nav-item" aria-label="Standings">📊</a>
+    <a href="scrips.html" class="nav-item" aria-label="Scrips">🧾</a>
+    <a href="wallet.html" class="nav-item nav-item--active" aria-label="Wallet">💼</a>
+    <a href="add.html" class="nav-item" aria-label="Add">➕</a>
+  </nav>
+
+  <script src="./assets/js/api.js?v=8"></script>
+  <script src="./assets/js/format.js?v=8"></script>
+  <script src="./assets/js/state.js?v=8"></script>
+  <script src="./assets/js/wallet.js?v=8"></script>
+</body>
+</html>
