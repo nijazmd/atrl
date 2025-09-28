@@ -97,6 +97,7 @@
     gap: var(--gap-3);
     max-width: 960px;
     margin: 0 auto;
+    padding-bottom: 65px;
   }
   
   /* ---------- Chips / filters ---------- */
@@ -151,6 +152,7 @@
     padding: var(--pad-3);
     display: grid;
     gap: var(--gap-2);
+    overflow: scroll;
   }
   
   /* ---------- Stats ---------- */
@@ -419,8 +421,10 @@
   
   /* ---------- Bottom nav (emoji icons) ---------- */
   .bottom-nav {
-    position: sticky;
+    position: fixed;
+    left: 0;
     bottom: 0;
+    width: 100%;
     z-index: 30;
     backdrop-filter: blur(6px) saturate(120%);
     background: linear-gradient(180deg, rgba(15,20,27,.7), rgba(15,20,27,.92));
@@ -428,7 +432,7 @@
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     align-items: center;
-    padding: .35rem env(safe-area-inset-left, 8px) .45rem env(safe-area-inset-right, 8px);
+    padding: 5px;
   }
   
   .nav-item {
@@ -533,3 +537,8 @@ input[type="number"] { -moz-appearance: textfield; }
 
 /* prevent grid items from overflowing so they don’t overlap */
 .grid-2 .row, .grid-3 .row { min-width: 0; }
+
+.ver {
+  font-size: 12px;
+  text-align: center;
+}

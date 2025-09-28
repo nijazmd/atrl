@@ -131,6 +131,7 @@
         <div class="trade-card-actions">
           <button class="btn btn-small" data-act="entry">➕ Entry</button>
           <button class="btn btn-small" data-act="exit">➖ Exit</button>
+          <button class="btn btn-small" data-act="sltp">⚙️ SL/TP</button>
           <button class="btn btn-small" data-act="exit-sl">🛑</button>
           <button class="btn btn-small" data-act="exit-tp">🎯</button>
           <button class="btn btn-small" data-act="close">✅ Close</button>
@@ -202,6 +203,29 @@
             <button class="btn btn-primary" data-submit="exit">Add Exit</button>
           </div>
         </div>
+
+        <div class="inline-form hidden" data-form="sltp">
+          <div class="row">
+            <label class="lbl">SL</label>
+            <div class="number-group">
+              <button type="button" class="btn-step" data-step="sl-edit" data-dir="down">−</button>
+              <input class="input" type="number" inputmode="decimal" data-input="sl-edit" placeholder="${r.PositionSL || ''}" value="${r.PositionSL || ''}">
+              <button type="button" class="btn-step" data-step="sl-edit" data-dir="up">+</button>
+            </div>
+          </div>
+          <div class="row">
+            <label class="lbl">TP</label>
+            <div class="number-group">
+              <button type="button" class="btn-step" data-step="tp-edit" data-dir="down">−</button>
+              <input class="input" type="number" inputmode="decimal" data-input="tp-edit" placeholder="${r.PositionTP || ''}" value="${r.PositionTP || ''}">
+              <button type="button" class="btn-step" data-step="tp-edit" data-dir="up">+</button>
+            </div>
+          </div>
+          <div class="row">
+            <button class="btn btn-primary" data-submit="sltp">Save SL/TP</button>
+          </div>
+        </div>
+
       `;
 
       // wire buttons
@@ -212,7 +236,9 @@
       const formExit = card.querySelector("[data-form='exit']");
       const btnExitSL = card.querySelector("[data-act='exit-sl']");
       const btnExitTP = card.querySelector("[data-act='exit-tp']");
-
+      const btnSLTP  = card.querySelector("[data-act='sltp']");
+      const formSLTP = card.querySelector("[data-form='sltp']");
+      
       btnEntry.addEventListener("click", () => {
         formExit.classList.add("hidden");
         formEntry.classList.toggle("hidden");
@@ -223,6 +249,12 @@
         formExit.classList.toggle("hidden");
         formExit.querySelector("[data-input='qty-exit']").focus();
       });
+      btnSLTP.addEventListener("click", () => {
+        formEntry.classList.add("hidden");
+        formExit.classList.add("hidden");
+        formSLTP.classList.toggle("hidden");
+        formSLTP.querySelector("[data-input='sl-edit']").focus();
+      });      
       btnClose.addEventListener("click", async () => {
         await API.closePosition(r.PositionID);
         await refresh();
@@ -328,6 +360,22 @@
         await API.addLeg({ positionId: r.PositionID, legType: "Exit", qty: q||"0", price: p, total: t||"", exitType });
         await refresh();
       });
+
+      formSLTP.querySelector("[data-submit='sltp']").addEventListener("click", async () => {
+        const sl = formSLTP.querySelector("[data-input='sl-edit']").value;
+        const tp = formSLTP.querySelector("[data-input='tp-edit']").value;
+        try {
+          await API.updatePosition({
+            positionId: r.PositionID,
+            PositionSL: sl,        // empty string allowed
+            PositionTP: tp
+          });
+          await refresh();
+        } catch (e) {
+          alert(e.message || "Failed to update SL/TP");
+        }
+      });
+      
 
       openList.appendChild(card);
     });

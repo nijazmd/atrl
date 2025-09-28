@@ -36,6 +36,7 @@ const API = (() => {
       getHomeData: (leagueIds) => post("getHomeData", { leagueIds }),
       addLeg: (payload) => post("addLeg", payload),
       closePosition: (positionId) => post("closePosition", { positionId }),
+      updatePosition: (payload) => post("updatePosition", payload),
       getPlayerDetail: (playerId, leagueIds) => post("getPlayerDetail", { playerId, leagueIds }),
       updateLeg: (payload) => post("updateLeg", payload),
       getTeamDetail: (teamId, leagueIds) => post("getTeamDetail", { teamId, leagueIds }),

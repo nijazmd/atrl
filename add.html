@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
   <title>ATrL – Add Trade</title>
   <link rel="stylesheet" href="assets/css/style.css">
   <script>window.APP_SCRIPT_ENDPOINT = "YOUR_APPS_SCRIPT_EXEC_URL";</script>
@@ -50,22 +51,6 @@
 
         <div class="grid-3">
           <div class="input-row">
-            <label class="label">SL</label>
-            <div class="input-stepper">
-              <button type="button" data-step="-1">−</button>
-              <input id="sl" type="text" inputmode="decimal" step="any" placeholder="0.00">
-              <button type="button" data-step="+1">+</button>
-            </div>
-          </div>
-          <div class="input-row">
-            <label class="label">TP (opt)</label>
-            <div class="input-stepper">
-              <button type="button" data-step="-1">−</button>
-              <input id="tp" type="text" inputmode="decimal" step="any" placeholder="0.00">
-              <button type="button" data-step="+1">+</button>
-            </div>
-          </div>
-          <div class="input-row">
             <label class="label">Entry</label>
             <div class="input-stepper">
               <button type="button" data-step="-1">−</button>
@@ -73,9 +58,6 @@
               <button type="button" data-step="+1">+</button>
             </div>
           </div>
-        </div>
-
-        <div class="grid-2">
           <div class="input-row">
             <label class="label">Qty</label>
             <div class="input-stepper">
@@ -89,6 +71,25 @@
             <div class="input-stepper">
               <button type="button" data-step="-1">−</button>
               <input id="total" type="text" inputmode="decimal" step="any" placeholder="0.00">
+              <button type="button" data-step="+1">+</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="input-row">
+            <label class="label">SL</label>
+            <div class="input-stepper">
+              <button type="button" data-step="-1">−</button>
+              <input id="sl" type="text" inputmode="decimal" step="any" placeholder="0.00">
+              <button type="button" data-step="+1">+</button>
+            </div>
+          </div>
+          <div class="input-row">
+            <label class="label">TP</label>
+            <div class="input-stepper">
+              <button type="button" data-step="-1">−</button>
+              <input id="tp" type="text" inputmode="decimal" step="any" placeholder="0.00">
               <button type="button" data-step="+1">+</button>
             </div>
           </div>

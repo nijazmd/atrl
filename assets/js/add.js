@@ -128,8 +128,8 @@
     const side = sideChips.querySelector(".chip--selected")?.dataset.side;
     const scripName = scripInput.value.trim();
 
-    if (!playerId || !scripName || !slEl.value || !entryEl.value) {
-      alert("Player, Scrip, SL and Entry are required.");
+    if (!playerId || !scripName || !entryEl.value) {
+      alert("Player, Scrip and Entry are required.");
       return;
     }
 
@@ -144,8 +144,8 @@
       playerId,
       leagues: leagueIds,
       // server will resolve season + round via RoundsMeta
-      positionSL: slEl.value, 
-      positionTP: tpEl.value || "",
+      positionSL: slEl.value || "", 
+      positionTP: tpEl.value || "",      
       // first entry leg
       qty: qtyEl.value || "0",
       entry: entryEl.value,
