@@ -498,6 +498,8 @@
     pointer-events: none;
   }
   
+
+
   /* ---------- Animations (subtle) ---------- */
   @keyframes fadeInUp {
     from { opacity: 0; transform: translateY(6px); }
@@ -508,3 +510,26 @@
   /* ---------- Print safety ---------- */
   @media print { .bottom-nav, .chip-row, .league-chips { display: none !important; } }
   
+/* === Add-page fixes: universal dark inputs, disable native spinners, sizing === */
+.app input[type="number"],
+.app input[type="text"],
+.app input[type="search"],
+.app input[type="datetime-local"],
+.app select,
+.app textarea {
+  background: #0c1218;
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+/* kill native number spinners */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+input[type="number"] { -moz-appearance: textfield; }
+
+.number-group { width: 100%; }
+.number-group .input { width: 100%; min-width: 0; }
+
+/* prevent grid items from overflowing so they don’t overlap */
+.grid-2 .row, .grid-3 .row { min-width: 0; }

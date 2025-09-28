@@ -76,18 +76,21 @@
   }
 
   function renderOpen(rows){
-    const tagHtml = (r.Tags || "")
-    .toString()
-    .split(",")
-    .map(s => s.trim())
-    .filter(Boolean)
-    .map(t => `<span class="tag">#${t}</span>`)
-    .join(" ");
-
     openList.innerHTML = "";
-    if (!rows.length) { openList.innerHTML = `<div class="empty">No open positions.</div>`; return; }
-
+    if (!rows.length) { 
+      openList.innerHTML = `<div class="empty">No open positions.</div>`; 
+      return; 
+    }
+  
     rows.forEach(r => {
+      const tagHtml = (r.Tags || "")
+        .toString()
+        .split(",")
+        .map(s => s.trim())
+        .filter(Boolean)
+        .map(t => `<span class="tag">#${t}</span>`)
+        .join(" ");
+  
       const card = document.createElement("div");
       card.className = "trade-card";
 

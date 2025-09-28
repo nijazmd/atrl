@@ -3,32 +3,46 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>ATrL – Player</title>
-  <link rel="stylesheet" href="./assets/css/style.css?v=10">
+  <title>ATrL – Home</title>
+  <link rel="stylesheet" href="./assets/css/style.css?v=12">
 </head>
 <body class="app app-home">
+
   <header class="app-header">
     <div class="league-chips" id="league-chips"></div>
     <div class="round-banner" id="round-banner"></div>
+    <div class="chip-row" id="tag-filter"></div>
   </header>
 
   <main class="main">
     <!-- Open Positions -->
     <section class="card">
-      <div class="card-header"><h2 class="card-title">Open Positions</h2></div>
-      <div class="card-body" id="open-list"></div>
+      <div class="card-header">
+        <h2 class="card-title">Open Positions</h2>
+      </div>
+      <div class="card-body">
+        <div id="open-list" class="open-list"></div>
+      </div>
     </section>
 
-    <!-- Master wallet snapshot(s) -->
+    <!-- Master Wallet snapshot & quick stats -->
     <section class="card">
-      <div class="card-header"><h2 class="card-title">Master Wallet</h2></div>
-      <div class="card-body" id="wallet-cards"></div>
+      <div class="card-header">
+        <h2 class="card-title">Master Wallet</h2>
+      </div>
+      <div class="card-body">
+        <div id="wallet-cards"></div>
+      </div>
     </section>
 
-    <!-- Last 5 trades -->
+    <!-- Last 5 Trades -->
     <section class="card">
-      <div class="card-header"><h2 class="card-title">Last 5 Trades</h2></div>
-      <div class="card-body" id="last-trades"></div>
+      <div class="card-header">
+        <h2 class="card-title">Last 5 Trades</h2>
+      </div>
+      <div class="card-body">
+        <div id="last-trades"></div>
+      </div>
     </section>
   </main>
 
@@ -40,9 +54,9 @@
     <a href="add.html" class="nav-item" aria-label="Add">➕</a>
   </nav>
 
-  <script src="./assets/js/api.js?v=9"></script>
-  <script src="./assets/js/format.js?v=9"></script>
-  <script src="./assets/js/state.js?v=9"></script>
-  <script src="./assets/js/home.js?v=9"></script>
+  <script src="./assets/js/api.js?v=12"></script>
+  <script src="./assets/js/format.js?v=12"></script>
+  <script src="./assets/js/state.js?v=12"></script>
+  <script src="./assets/js/home.js?v=12"></script>
 </body>
 </html>
