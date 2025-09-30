@@ -542,3 +542,83 @@ input[type="number"] { -moz-appearance: textfield; }
   font-size: 12px;
   text-align: center;
 }
+
+/* Orders cards */
+.orders-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.order-card {
+  border: 1px solid var(--border, #e7e7e7);
+  border-radius: 14px;
+  padding: 10px 12px;
+  background: var(--surface, #fff);
+  box-shadow: 0 1px 0 rgba(0,0,0,0.03);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    "head actions"
+    "meta actions";
+  align-items: center;
+}
+
+.order-card .head {
+  grid-area: head;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  font-weight: 600;
+}
+.order-card .meta {
+  grid-area: meta;
+  font-size: 13px;
+  color: #666;
+  margin-top: 4px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.order-card .actions {
+  grid-area: actions;
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+  align-self: stretch;
+  align-items: center;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  line-height: 1;
+  border: 1px solid transparent;
+}
+
+.badge.entry { background:#eef8ff; color:#0a63b1; border-color:#d6ecff; }
+.badge.exit  { background:#fff1f1; color:#c42323; border-color:#ffdcdc; }
+.badge.tp    { background:#eafff2; color:#1e8f4f; border-color:#d8ffe8; }
+.badge.sl    { background:#fff4e0; color:#b36200; border-color:#ffe7c2; }
+
+.status {
+  font-size: 12px; padding: 3px 8px; border-radius: 999px;
+  border: 1px dashed #ddd; color: #666; background: #fafafa;
+}
+.status.pending  { border-color:#ffd9a8; background:#fff6ea; color:#a35a00; }
+.status.executed { border-color:#cfe7ff; background:#f3f9ff; color:#0a63b1; }
+
+.icon-btn {
+  width: 34px; height: 34px; display: inline-flex;
+  align-items:center; justify-content:center;
+  border: 1px solid #071572; border-radius: 10px; background: #153050;
+  cursor: pointer;
+}
+.icon-btn:hover { background:#153050; }
+.icon-btn.cancel:hover { background:#153050; }
+.icon-btn:disabled { opacity:.45; cursor:not-allowed; }

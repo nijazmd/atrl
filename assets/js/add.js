@@ -13,6 +13,8 @@
   const totalEl = document.getElementById("total");
   const rrView = document.getElementById("rr-view");
   const submitBtn = document.getElementById("submit-btn");
+  const placeOrderEl = document.getElementById("place-order");
+
 
   // Attach steppers
   document.querySelectorAll(".input-stepper").forEach(UI.attachCryptoStepper);
@@ -151,6 +153,7 @@
       entry: entryEl.value,
       total: totalEl.value || Compute.mulStr(qtyEl.value||"0", entryEl.value||"0"),
       rr: Compute.rr(entryEl.value, slEl.value, (tpEl.value || entryEl.value), side),
+      inOrder: !!placeOrderEl?.checked,
       tags: selectedTags
     };
 

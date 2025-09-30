@@ -27,7 +27,6 @@ const API = (() => {
       getAddPageInit: (leagueIds) => post("getAddPageInit", { leagueIds }),
       createPositionWithEntry: (payload) => post("createPositionWithEntry", payload),
       getExposureSummary: (leagueIds) => post("getExposureSummary", { leagueIds }),
-      getHomeData: (leagueIds) => post("getHomeData", { leagueIds }),
       getStandings: (leagueIds, scope) => post("getStandings", { leagueIds, scope }),
       getScripsStats: (leagueIds) => post("getScripsStats", { leagueIds }),
       getScripDetail: (scripId, leagueIds) => post("getScripDetail", { scripId, leagueIds }),
@@ -40,6 +39,9 @@ const API = (() => {
       getPlayerDetail: (playerId, leagueIds) => post("getPlayerDetail", { playerId, leagueIds }),
       updateLeg: (payload) => post("updateLeg", payload),
       getTeamDetail: (teamId, leagueIds) => post("getTeamDetail", { teamId, leagueIds }),
+      executeLeg: (legId) => post("executeLeg", { legId }),
+      cancelLeg:  (legId) => post("cancelLeg",  { legId }),
+      deletePosition: (positionId) => post("deletePosition", { positionId }),
     };
   })();
   

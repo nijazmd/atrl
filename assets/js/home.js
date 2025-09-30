@@ -95,8 +95,33 @@
       card.className = "trade-card";
 
       const rr = r.RR || "—";
-      const estSL = r.EstAtSL ? `${Fmt.compact(r.EstAtSL.pnl)} (${(Number(r.EstAtSL.pct||0)).toFixed(2)}%)` : "—";
-      const estTP = r.EstAtTP ? `${Fmt.compact(r.EstAtTP.pnl)} (${(Number(r.EstAtTP.pct||0)).toFixed(2)}%)` : "—";
+      // --- derived stats (frontend only) ---
+      const side = String(r.Side || 'Long').toLowerCase();
+      const avg  = Number(r.AvgEntry || 0);
+      const sl   = Number(r.PositionSL || 0);
+      const tp   = Number(r.PositionTP || 0);
+      const oq   = Number(r.OpenQty || 0);
+
+      function pnlAt(price){
+        if (!price || !oq || !avg) return null;
+        const diff = (side === 'long') ? (price - avg) : (avg - price);
+        const pnl  = diff * oq;
+        const pct  = avg ? (diff / avg) * 100 : 0;
+        return { pnl, pct };
+      }
+      const estAtSL = pnlAt(sl);
+      const estAtTP = pnlAt(tp);
+
+      // r:r = reward/risk from entry to TP vs entry to SL
+      let rrTxt = "—";
+      if (avg && sl && tp) {
+        const reward = Math.abs((side === 'long') ? (tp - avg) : (avg - tp));
+        const risk   = Math.abs((side === 'long') ? (avg - sl) : (sl - avg));
+        if (risk > 0) rrTxt = (reward / risk).toFixed(2);
+      }
+      const estSLTxt = estAtSL ? `${Fmt.compact(estAtSL.pnl)} (${estAtSL.pct.toFixed(2)}%)` : "—";
+      const estTPTxt = estAtTP ? `${Fmt.compact(estAtTP.pnl)} (${estAtTP.pct.toFixed(2)}%)` : "—";
+
       const upnl = Number(r.UnrlzPnL || 0);
       const upnlPct = Number(r.UnrlzPnLPct || 0);
       const upnlClass = upnl > 0 ? "pos" : (upnl < 0 ? "neg" : "");
@@ -117,27 +142,22 @@
         <div class="trade-card-stats">
           <div class="stat"><span class="stat-label">Open</span><span class="stat-value">${r.OpenQty}</span></div>
           <div class="stat"><span class="stat-label">Avg</span><span class="stat-value">${Fmt.compact(r.AvgEntry)}</span></div>
-          <div class="stat"><span class="stat-label">SL</span><span class="stat-value">${r.PositionSL || "—"}</span></div>
-          <div class="stat"><span class="stat-label">TP</span><span class="stat-value">${r.PositionTP || "—"}</span></div>
-          <div class="stat"><span class="stat-label">r:r</span><span class="stat-value">${rr}</span></div>
+          <div class="stat"><span class="stat-label">r:r</span><span class="stat-value">${rrTxt}</span></div>
+          <div class="stat"><span class="stat-label">@SL</span><span class="stat-value">${estSLTxt}</span></div>
+          <div class="stat"><span class="stat-label">@TP</span><span class="stat-value">${estTPTxt}</span></div>
           <div class="stat"><span class="stat-label">Realized</span><span class="stat-value">${Fmt.compact(r.RealizedPnL)} (${(Number(r.RealizedPnLPct||0)).toFixed(2)}%)</span></div>
-          <div class="stat"><span class="stat-label">@SL</span><span class="stat-value">${estSL}</span></div>
-          <div class="stat"><span class="stat-label">@TP</span><span class="stat-value">${estTP}</span></div>
-          <div class="stat"><span class="stat-label">Mark</span><span class="stat-value">${markTxt}</span></div>
-          <div class="stat"><span class="stat-label">uPnL</span><span class="stat-value ${upnlClass}">${Fmt.compact(upnl)}</span></div>
-          <div class="stat"><span class="stat-label">uPnL%</span><span class="stat-value ${upnlClass}">${upnlPct ? upnlPct.toFixed(2) : "0.00"}%</span></div>        
+     
         </div>
 
         <div class="trade-card-actions">
-          <button class="btn btn-small" data-act="entry">➕ Entry</button>
-          <button class="btn btn-small" data-act="exit">➖ Exit</button>
-          <button class="btn btn-small" data-act="sltp">⚙️ SL/TP</button>
-          <button class="btn btn-small" data-act="exit-sl">🛑</button>
-          <button class="btn btn-small" data-act="exit-tp">🎯</button>
+          <button class="btn btn-small" data-act="entry">➕ Add Entry</button>
+          <button class="btn btn-small" data-act="exit">➖ Add Exit</button>
+          <div class="spacer"></div>
           <button class="btn btn-small" data-act="close">✅ Close</button>
-        </div>  
-        
+          <button class="btn btn-small btn-danger" data-act="delete">🗑️ Delete</button>
+        </div>
 
+        <!-- ENTRY form: qty, price, total -->
         <div class="inline-form hidden" data-form="entry">
           <div class="row">
             <label class="lbl">Qty</label>
@@ -169,62 +189,94 @@
           </div>
         </div>
 
+        <!-- EXIT form: qty (prefilled open), optional Target and SL → creates pending exits -->
         <div class="inline-form hidden" data-form="exit">
           <div class="row">
             <label class="lbl">Qty</label>
             <div class="number-group">
               <button type="button" class="btn-step" data-step="qty-exit" data-dir="down">−</button>
-              <input class="input" type="number" inputmode="decimal" data-input="qty-exit" placeholder="${r.OpenQty}">
+              <input class="input" type="number" inputmode="decimal" data-input="qty-exit" placeholder="${r.OpenQty}" value="${r.OpenQty}">
               <button type="button" class="btn-step" data-step="qty-exit" data-dir="up">+</button>
             </div>
           </div>
           <div class="row">
-            <label class="lbl">Price</label>
+            <label class="lbl">Target</label>
             <div class="number-group">
-              <button type="button" class="btn-step" data-step="price-exit" data-dir="down">−</button>
-              <input class="input" type="number" inputmode="decimal" data-input="price-exit" placeholder="${r.AvgEntry}">
-              <button type="button" class="btn-step" data-step="price-exit" data-dir="up">+</button>
-            </div>
-            <div class="btn-row">
-              <button class="btn btn-tiny" data-fill="sl">🛑 SL</button>
-              <button class="btn btn-tiny" data-fill="tp">🎯 TP</button>
+              <button type="button" class="btn-step" data-step="tp-exit" data-dir="down">−</button>
+              <input class="input" type="number" inputmode="decimal" data-input="tp-exit" placeholder="${r.PositionTP || ''}">
+              <button type="button" class="btn-step" data-step="tp-exit" data-dir="up">+</button>
             </div>
           </div>
-          <div class="row">
-            <label class="lbl">Total</label>
-            <div class="number-group">
-              <button type="button" class="btn-step" data-step="total-exit" data-dir="down">−</button>
-              <input class="input" type="number" inputmode="decimal" data-input="total-exit" placeholder="0">
-              <button type="button" class="btn-step" data-step="total-exit" data-dir="up">+</button>
-            </div>
-            <div class="hint">Type Qty or Total — the other updates.</div>
-          </div>
-          <div class="row">
-            <button class="btn btn-primary" data-submit="exit">Add Exit</button>
-          </div>
-        </div>
-
-        <div class="inline-form hidden" data-form="sltp">
           <div class="row">
             <label class="lbl">SL</label>
             <div class="number-group">
-              <button type="button" class="btn-step" data-step="sl-edit" data-dir="down">−</button>
-              <input class="input" type="number" inputmode="decimal" data-input="sl-edit" placeholder="${r.PositionSL || ''}" value="${r.PositionSL || ''}">
-              <button type="button" class="btn-step" data-step="sl-edit" data-dir="up">+</button>
+              <button type="button" class="btn-step" data-step="sl-exit" data-dir="down">−</button>
+              <input class="input" type="number" inputmode="decimal" data-input="sl-exit" placeholder="${r.PositionSL || ''}">
+              <button type="button" class="btn-step" data-step="sl-exit" data-dir="up">+</button>
             </div>
           </div>
           <div class="row">
-            <label class="lbl">TP</label>
-            <div class="number-group">
-              <button type="button" class="btn-step" data-step="tp-edit" data-dir="down">−</button>
-              <input class="input" type="number" inputmode="decimal" data-input="tp-edit" placeholder="${r.PositionTP || ''}" value="${r.PositionTP || ''}">
-              <button type="button" class="btn-step" data-step="tp-edit" data-dir="up">+</button>
-            </div>
+            <button class="btn btn-primary" data-submit="exit">Add Pending Exit(s)</button>
           </div>
-          <div class="row">
-            <button class="btn btn-primary" data-submit="sltp">Save SL/TP</button>
-          </div>
+          <div class="hint">We’ll create a pending exit for Target (if given) and another for SL (if given).</div>
         </div>
+
+        <!-- Orders lists -->
+        ${(r.Orders && r.Orders.length) ? `
+          <div class="orders-block">
+            <div class="orders-title">Pending Orders</div>
+            <div class="orders-grid">
+              ${r.Orders
+                .filter(o => String(o.LegStatus)==="InOrder")
+                .map(o => `
+                <div class="order-card">
+                  <div class="head">
+                    <span class="badge ${o.IsExit ? 'exit' : 'entry'}">${o.IsExit ? 'Exit' : 'Entry'}</span>
+                    ${o.ExitType ? `<span class="badge ${o.ExitType==='TP' ? 'tp' : 'sl'}">${o.ExitType}</span>` : ``}
+                    <span class="status pending">Pending</span>
+                  </div>
+                  <div class="meta">
+                    <span>Qty: <b>${o.Qty}</b></span>
+                    <span>@ <b>${Fmt.compact(o.Price)}</b></span>
+                    <span>${Fmt.dateTime(o.Timestamp)}</span>
+                  </div>
+                  <div class="actions">
+                    ${o.IsExit ? `<button class="icon-btn" title="Execute" data-exec="${o.LegID}">▶️</button>` : ``}
+                    <button class="icon-btn cancel" title="Cancel" data-cancel="${o.LegID}">✖</button>
+                  </div>
+                </div>
+              `).join('') || `<div class="empty">No pending orders.</div>`}
+            </div>
+          </div>
+
+          <div class="orders-block">
+            <div class="orders-title">Completed Orders</div>
+            <div class="orders-grid">
+              ${r.Orders
+                .filter(o => String(o.LegStatus)==="Executed")
+                .sort((a,b)=> new Date(b.ExecTimestamp||b.Timestamp) - new Date(a.ExecTimestamp||a.Timestamp))
+                .map(o => `
+                <div class="order-card">
+                  <div class="head">
+                    <span class="badge ${o.IsExit ? 'exit' : 'entry'}">${o.IsExit ? 'Exit' : 'Entry'}</span>
+                    ${o.ExitType ? `<span class="badge ${o.ExitType==='TP' ? 'tp' : 'sl'}">${o.ExitType}</span>` : ``}
+                    <span class="status executed">Executed</span>
+                  </div>
+                  <div class="meta">
+                    <span>Qty: <b>${o.Qty}</b></span>
+                    <span>@ <b>${Fmt.compact(o.Price)}</b></span>
+                    <span>${Fmt.dateTime(o.ExecTimestamp || o.Timestamp)}</span>
+                    ${o.IsExit ? `<span>Realized: <b>${Fmt.compact(o.RealizedPnl || 0)} (${(Number(o.RealizedPnlPct||0)).toFixed(2)}%)</b></span>` : ``}
+                  </div>
+                  <div class="actions">
+                    <!-- no actions for executed -->
+                  </div>
+                </div>
+              `).join('') || `<div class="empty">No completed orders.</div>`}
+            </div>
+          </div>
+        ` : ``}
+
 
       `;
 
@@ -232,12 +284,9 @@
       const btnEntry = card.querySelector("[data-act='entry']");
       const btnExit  = card.querySelector("[data-act='exit']");
       const btnClose = card.querySelector("[data-act='close']");
+      const btnDel   = card.querySelector("[data-act='delete']");
       const formEntry= card.querySelector("[data-form='entry']");
       const formExit = card.querySelector("[data-form='exit']");
-      const btnExitSL = card.querySelector("[data-act='exit-sl']");
-      const btnExitTP = card.querySelector("[data-act='exit-tp']");
-      const btnSLTP  = card.querySelector("[data-act='sltp']");
-      const formSLTP = card.querySelector("[data-form='sltp']");
       
       btnEntry.addEventListener("click", () => {
         formExit.classList.add("hidden");
@@ -249,35 +298,15 @@
         formExit.classList.toggle("hidden");
         formExit.querySelector("[data-input='qty-exit']").focus();
       });
-      btnSLTP.addEventListener("click", () => {
-        formEntry.classList.add("hidden");
-        formExit.classList.add("hidden");
-        formSLTP.classList.toggle("hidden");
-        formSLTP.querySelector("[data-input='sl-edit']").focus();
-      });      
       btnClose.addEventListener("click", async () => {
         await API.closePosition(r.PositionID);
         await refresh();
       });
-
-      async function oneTapExit(kind){
-        const qty = Number(r.OpenQty||0);
-        const price = kind==="SL" ? Number(r.PositionSL||0) : Number(r.PositionTP||0);
-        if (!qty) return alert("No open qty.");
-        if (!price) return alert(`No ${kind} set.`);
-        await API.addLeg({
-          positionId: r.PositionID,
-          legType: "Exit",
-          qty: String(qty),
-          price: String(price),
-          total: String(qty*price),
-          exitType: kind
-        });
+      btnDel.addEventListener("click", async () => {
+        if (!confirm("Delete this position and all its legs? This cannot be undone.")) return;
+        await API.deletePosition(r.PositionID);
         await refresh();
-      }
-
-      btnExitSL.addEventListener("click", () => oneTapExit("SL"));
-      btnExitTP.addEventListener("click", () => oneTapExit("TP"));
+      });
 
 
       // steppers
@@ -286,53 +315,51 @@
           const dir = btn.dataset.dir === "up" ? 1 : -1;
           const key = btn.dataset.step;
           const input = card.querySelector(`[data-input='${key}']`);
-          input.value = stepByLastDigit(input.value, dir);
-          // link Qty <-> Total if we can (needs price)
-          const [qKey, pKey, tKey] = key.includes("entry")
-            ? ["qty-entry","price-entry","total-entry"]
-            : ["qty-exit","price-exit","total-exit"];
-          const qEl = card.querySelector(`[data-input='${qKey}']`);
-          const pEl = card.querySelector(`[data-input='${pKey}']`);
-          const tEl = card.querySelector(`[data-input='${tKey}']`);
-          const price = Number(pEl.value || 0);
-          if (price > 0) {
-            if (input === qEl) tEl.value = (Number(qEl.value||0) * price).toString();
-            if (input === tEl) qEl.value = (Number(tEl.value||0) / price).toString();
+          if (input) input.value = stepByLastDigit(input.value, dir);
+
+          // Only do Qty <-> Total linking for ENTRY fields
+          if (key.includes("entry")) {
+            const qEl = card.querySelector(`[data-input='qty-entry']`);
+            const pEl = card.querySelector(`[data-input='price-entry']`);
+            const tEl = card.querySelector(`[data-input='total-entry']`);
+            if (qEl && pEl && tEl) {
+              const price = Number(pEl.value || 0);
+              if (price > 0) {
+                if (input === qEl) tEl.value = (Number(qEl.value||0) * price).toString();
+                if (input === tEl) qEl.value = (Number(tEl.value||0) / price).toString();
+              }
+            }
           }
+
         });
       });
+
+      if (Number(r.OpenQty || 0) > 0) {
+        btnClose.disabled = true;
+        btnClose.title = "Execute exits until Open = 0 to close.";
+      }      
 
       // two-way link on typing
       function link(qKey, pKey, tKey){
         const qEl = card.querySelector(`[data-input='${qKey}']`);
         const pEl = card.querySelector(`[data-input='${pKey}']`);
         const tEl = card.querySelector(`[data-input='${tKey}']`);
+      
+        // If any field is missing (e.g. exit form), do nothing
+        if (!qEl || !pEl || !tEl) return;
+      
         function recompute(from){
           const price = Number(pEl.value || 0);
           if (!price) return;
-          if (from==="qty") tEl.value = (Number(qEl.value||0)*price).toString();
+          if (from==="qty")   tEl.value = (Number(qEl.value||0)*price).toString();
           if (from==="total") qEl.value = (Number(tEl.value||0)/price).toString();
         }
         qEl.addEventListener("input", () => recompute("qty"));
         tEl.addEventListener("input", () => recompute("total"));
-        pEl.addEventListener("input", () => recompute("qty")); // default to qty driver
+        pEl.addEventListener("input", () => recompute("qty"));
       }
+      
       link("qty-entry","price-entry","total-entry");
-      link("qty-exit","price-exit","total-exit");
-
-      // quick fill SL/TP
-      formExit.querySelector("[data-fill='sl']").addEventListener("click", (e)=> {
-        e.preventDefault();
-        const pEl = formExit.querySelector("[data-input='price-exit']");
-        pEl.value = r.PositionSL || "";
-        pEl.dispatchEvent(new Event("input"));
-      });
-      formExit.querySelector("[data-fill='tp']").addEventListener("click", (e)=> {
-        e.preventDefault();
-        const pEl = formExit.querySelector("[data-input='price-exit']");
-        pEl.value = r.PositionTP || "";
-        pEl.dispatchEvent(new Event("input"));
-      });
 
       // submit entry
       formEntry.querySelector("[data-submit='entry']").addEventListener("click", async () => {
@@ -344,38 +371,68 @@
         await API.addLeg({ positionId: r.PositionID, legType: "Entry", qty: q||"0", price: p, total: t||"" });
         await refresh();
       });
+      
 
-      // submit exit
+      // submit exit (supports executed OR pending)
       formExit.querySelector("[data-submit='exit']").addEventListener("click", async () => {
-        const q = formExit.querySelector("[data-input='qty-exit']").value;
-        const p = formExit.querySelector("[data-input='price-exit']").value;
-        const t = formExit.querySelector("[data-input='total-exit']").value;
-        if (!Number(q) && !Number(t)) return alert("Enter Qty or Total");
-        if (!Number(p)) return alert("Enter Price");
-        // decide ExitType if price equals SL or TP (rough compare)
-        let exitType = "Manual";
-        const numP = Number(p), sl = Number(r.PositionSL||0), tp = Number(r.PositionTP||0);
-        if (sl && Math.abs(numP - sl) < 1e-12) exitType = "SL";
-        if (tp && Math.abs(numP - tp) < 1e-12) exitType = "TP";
-        await API.addLeg({ positionId: r.PositionID, legType: "Exit", qty: q||"0", price: p, total: t||"", exitType });
+        const q  = formExit.querySelector("[data-input='qty-exit']").value;
+        const tp = formExit.querySelector("[data-input='tp-exit']").value;
+        const sl = formExit.querySelector("[data-input='sl-exit']").value;
+        const qty = Number(q||0);
+        if (!qty) return alert("Enter Qty");
+      
+        // 👉 add this line:
+        const ocoId = `OCO-${r.PositionID}-${Date.now()}`;
+      
+        const tasks = [];
+        if (Number(tp)) {
+          tasks.push(API.addLeg({
+            positionId: r.PositionID,
+            legType: "Exit",
+            qty: q,
+            price: tp,
+            total: String(qty * Number(tp)),
+            exitType: "TP",
+            status: "InOrder",
+            // 👉 add this:
+            ocoGroupId: ocoId
+          }));
+        }
+        if (Number(sl)) {
+          tasks.push(API.addLeg({
+            positionId: r.PositionID,
+            legType: "Exit",
+            qty: q,
+            price: sl,
+            total: String(qty * Number(sl)),
+            exitType: "SL",
+            status: "InOrder",
+            // 👉 add this:
+            ocoGroupId: ocoId
+          }));
+        }
+        if (!tasks.length) return alert("Provide Target and/or SL price.");
+        await Promise.all(tasks);
         await refresh();
       });
-
-      formSLTP.querySelector("[data-submit='sltp']").addEventListener("click", async () => {
-        const sl = formSLTP.querySelector("[data-input='sl-edit']").value;
-        const tp = formSLTP.querySelector("[data-input='tp-edit']").value;
-        try {
-          await API.updatePosition({
-            positionId: r.PositionID,
-            PositionSL: sl,        // empty string allowed
-            PositionTP: tp
-          });
-          await refresh();
-        } catch (e) {
-          alert(e.message || "Failed to update SL/TP");
-        }
-      });
       
+      
+
+      // Orders: execute / cancel
+      card.querySelectorAll("[data-exec]").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const legId = btn.getAttribute("data-exec");
+          try { await API.executeLeg(legId); await refresh(); }
+          catch (e) { alert(e.message || "Failed to execute"); }
+        });
+      });
+      card.querySelectorAll("[data-cancel]").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const legId = btn.getAttribute("data-cancel");
+          try { await API.cancelLeg(legId); await refresh(); }
+          catch (e) { alert(e.message || "Failed to cancel"); }
+        });
+      });
 
       openList.appendChild(card);
     });
@@ -417,8 +474,6 @@
       lastWrap.appendChild(row);
     });
   }
-
-  await refresh();
 
   function uniqueTags(rows){
     const set = new Set();
